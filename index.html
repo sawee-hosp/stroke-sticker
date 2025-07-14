@@ -173,7 +173,7 @@
 <script>
     // --- CONFIGURATION ---
     const LIFF_ID = "2005789397-37lemBgX";
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec"; // <-- สำคัญ: ใส่ URL ใหม่ของคุณที่นี่
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec"; // <-- ใส่ URL ที่ถูกต้องของคุณ
 
     let allStickers = [];
     let currentUserProfile = {};
@@ -220,26 +220,20 @@
         const dailyStickers = allStickers.filter(s => s.category === todayThai);
         const otherStickers = allStickers.filter(s => s.category !== todayThai);
 
-        // Render Daily Sticker
         const dailyContainer = document.getElementById('daily-sticker-container');
         dailyContainer.innerHTML = '';
         if (dailyStickers.length > 0) {
             const randomDailySticker = dailyStickers[Math.floor(Math.random() * dailyStickers.length)];
-            const dailyEl = createStickerElement(randomDailySticker, true);
-            dailyContainer.appendChild(dailyEl);
+            dailyContainer.appendChild(createStickerElement(randomDailySticker, true));
         } else {
             dailyContainer.innerHTML = '<p>ไม่มีสติกเกอร์สำหรับวันนี้</p>';
         }
 
-        // Render Sticker Library
         const libraryContainer = document.getElementById('sticker-library-container');
         libraryContainer.innerHTML = '';
         otherStickers
-            .sort((a, b) => b.stat - a.stat) // Sort by popularity
-            .forEach(sticker => {
-                const stickerEl = createStickerElement(sticker, false);
-                libraryContainer.appendChild(stickerEl);
-            });
+            .sort((a, b) => b.stat - a.stat)
+            .forEach(sticker => libraryContainer.appendChild(createStickerElement(sticker, false)));
     }
 
     function createStickerElement(sticker, isDaily) {
@@ -269,7 +263,6 @@
         document.getElementById('modal-sticker-image').src = sticker.imageURL;
         document.getElementById('modal-text-input').value = sticker.text;
         
-        // Set the share button's action dynamically
         const shareButton = document.getElementById('modal-share-button');
         shareButton.onclick = () => shareMessage(sticker);
 
@@ -280,70 +273,68 @@
         document.getElementById('share-modal').classList.remove('visible');
     }
 
+    // --- [START] UPDATED SHARE FUNCTION ---
     async function shareMessage(sticker) {
         const userMessage = document.getElementById('modal-text-input').value;
-        
-        const flexMessage = {
-            type: "flex",
-            altText: "เพื่อนส่งสติกเกอร์ห่วงใยมาให้คุณ",
-            contents: {
-                type: "bubble",
-                body: {
-                    type: "box",
-                    layout: "vertical",
-                    paddingAll: "0px",
-                    contents: [{
-                        type: "image",
-                        url: sticker.imageURL,
-                        size: "full",
-                        aspectMode: "cover",
-                        aspectRatio: "1:1",
-                        action: { type: "uri", label: "action", uri: sticker.linkURL }
-                    }]
-                },
-                styles: {
-                    body: { backgroundColor: sticker.flexBG || "#ffffff" }
-                }
-            }
-        };
 
-        const textMessage = { type: "text", text: userMessage };
+        // To ensure Quick Replies work reliably, we will send a single Text Message.
+        // We combine the sticker image URL and the user's text into one message.
+        const combinedTextMessage = `${userMessage}\n\nดูสติกเกอร์: ${sticker.imageURL}`;
 
-        const quickReply = {
+        const messageToSend = {
+            type: "text",
+            text: combinedTextMessage,
             quickReply: {
                 items: [
-                    { type: "action", action: { type: "uri", label: "แชร์สติกเกอร์นี้ต่อ", uri: `https://liff.line.me/${LIFF_ID}` } },
-                    { type: "action", action: { type: "uri", label: "เป็นเพื่อนกับเรา", uri: "https://lin.ee/MjUwBob" } },
-                    { type: "action", action: { type: "uri", label: "ประเมินสโตรก", uri: "https://liff.line.me/2005789397-WRm1lYd9" } }
+                    {
+                        type: "action",
+                        action: {
+                            type: "uri",
+                            label: "แชร์สติกเกอร์นี้ต่อ",
+                            uri: `https://liff.line.me/${LIFF_ID}`
+                        }
+                    },
+                    {
+                        type: "action",
+                        action: {
+                            type: "uri",
+                            label: "เป็นเพื่อนกับเรา",
+                            uri: "https://lin.ee/MjUwBob"
+                        }
+                    },
+                    {
+                        type: "action",
+                        action: {
+                            type: "uri",
+                            label: "ประเมินสโตรก",
+                            uri: "https://liff.line.me/2005789397-WRm1lYd9"
+                        }
+                    }
                 ]
             }
         };
-        
-        // Add quick reply to the text message
-        textMessage.quickReply = quickReply.quickReply;
 
         try {
-            const result = await liff.shareTargetPicker([flexMessage, textMessage]);
+            const result = await liff.shareTargetPicker([messageToSend]);
             if (result) {
-                // Share successful
                 closeModal();
                 await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
-                // Optionally show a success message before closing
                 liff.closeWindow();
             } else {
                 console.log("Share cancelled by user.");
             }
         } catch (error) {
             console.error("Share Failed:", error);
-            alert("เกิดข้อผิดพลาดในการแชร์");
+            alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
         }
     }
+    // --- [END] UPDATED SHARE FUNCTION ---
 
     async function logAndIncrementStat(stickerID, userID) {
         try {
             await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Important for GAS
+                mode: 'no-cors',
                 body: JSON.stringify({ stickerID, userID })
             });
             console.log(`Logged and requested stat increment for ${stickerID}`);
