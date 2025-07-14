@@ -277,13 +277,17 @@
     async function shareMessage(sticker) {
         const userMessage = document.getElementById('modal-text-input').value;
 
-        // To ensure Quick Replies work reliably, we will send a single Text Message.
-        // We combine the sticker image URL and the user's text into one message.
-        const combinedTextMessage = `${userMessage}\n\nดูสติกเกอร์: ${sticker.imageURL}`;
+        // Message 1: The Sticker Image
+        const imageMessage = {
+            type: "image",
+            originalContentUrl: sticker.imageURL,
+            previewImageUrl: sticker.imageURL // Use the same URL for preview
+        };
 
-        const messageToSend = {
+        // Message 2: The Text with Quick Reply
+        const textMessage = {
             type: "text",
-            text: combinedTextMessage,
+            text: userMessage,
             quickReply: {
                 items: [
                     {
@@ -315,12 +319,17 @@
         };
 
         try {
-            const result = await liff.shareTargetPicker([messageToSend]);
+            // Send both messages together
+            const result = await liff.shareTargetPicker([imageMessage, textMessage]);
+            
             if (result) {
+                // Share was successful
                 closeModal();
                 await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
+                // Close the LIFF window and return to the chat
                 liff.closeWindow();
             } else {
+                // Share was cancelled by the user
                 console.log("Share cancelled by user.");
             }
         } catch (error) {
