@@ -370,34 +370,76 @@
 
         try {
             if (sticker.category === 'วิดีโอ') {
+                // [FIXED] ปรับปรุง Video Flex ให้มี Footer
+                const videoUrl = sticker.imageURL;
                 const previewImageUrl = sticker.previewURL;
 
-                if (!previewImageUrl) {
-                    alert("ไม่พบภาพตัวอย่างสำหรับวิดีโอ ไม่สามารถแชร์ได้ (ข้อมูล previewURL ขาดหายไป)");
-                    console.error("Video share failed: previewURL is missing for stickerID:", sticker.stickerID);
+                if (!videoUrl || !previewImageUrl) {
+                    alert("ข้อมูลวิดีโอไม่สมบูรณ์ ไม่สามารถแชร์ได้ (URL หรือ previewURL ขาดหายไป)");
+                    console.error("Video share failed: URL or previewURL is missing for stickerID:", sticker.stickerID);
                     return;
-                }
-
-                const videoComponent = {
-                    type: "video",
-                    url: sticker.imageURL,
-                    previewUrl: previewImageUrl,
-                    altContent: {
-                        type: "image", size: "full", aspectRatio: "16:9",
-                        aspectMode: "cover", url: previewImageUrl
-                    }
-                };
-                
-                if (sticker.linkURL) {
-                    videoComponent.action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
                 }
 
                 const videoFlex = {
                     type: "flex",
-                    altText: `เพื่อนส่งวิดีโอ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
+                    altText: "เพื่อนส่งวิดีโอให้คุณ",
                     contents: {
                         type: "bubble",
-                        body: { type: "box", layout: "vertical", paddingAll: "0px", contents: [videoComponent] }
+                        size: "mega",
+                        body: {
+                            type: "box",
+                            layout: "vertical",
+                            paddingAll: "0px",
+                            contents: [
+                                {
+                                    type: "video",
+                                    url: videoUrl,
+                                    previewUrl: previewImageUrl,
+                                }
+                            ]
+                        },
+                        footer: {
+                            type: "box",
+                            layout: "vertical",
+                            spacing: "sm",
+                            paddingAll: "md",
+                            backgroundColor: "#FFFFFF", // ใช้สีพื้นหลังที่ปลอดภัย
+                            alignItems: "center",
+                            contents: [
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    maxWidth: "70%",
+                                    backgroundColor: "#FFFFFF",
+                                    cornerRadius: "md",
+                                    paddingAll: "sm",
+                                    borderColor: "#DDDDDD",
+                                    borderWidth: "1px",
+                                    action: {
+                                        type: "uri",
+                                        label: "แชร์ให้เพื่อนดู",
+                                        uri: `https://liff.line.me/${LIFF_ID}`
+                                    },
+                                    contents: [
+                                        {
+                                            type: "text",
+                                            text: "แชร์ให้เพื่อนดู",
+                                            color: "#111111",
+                                            size: "sm",
+                                            align: "center"
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: "text",
+                                    text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+                                    size: "xxs",
+                                    color: "#AAAAAA",
+                                    margin: "md",
+                                    wrap: true
+                                }
+                            ]
+                        }
                     }
                 };
                 messagesToSend.push(videoFlex);
@@ -441,18 +483,22 @@
                                 {
                                     type: "box",
                                     layout: "vertical",
-                                    maxWidth: "70%", // จำกัดความกว้างของปุ่มไว้ที่ 70%
+                                    maxWidth: "70%",
+                                    backgroundColor: "#FFFFFF",
+                                    cornerRadius: "md",
+                                    paddingAll: "sm",
+                                    action: {
+                                        type: "uri",
+                                        label: "ส่งให้เพื่อน",
+                                        uri: `https://liff.line.me/${LIFF_ID}`
+                                    },
                                     contents: [
                                         {
-                                            type: "button",
-                                            style: "secondary",
-                                            color: "#FFFFFF",
-                                            height: "xs",
-                                            action: {
-                                                type: "uri",
-                                                label: "ส่งให้เพื่อน", // ทำให้ข้อความสั้นลง
-                                                uri: `https://liff.line.me/${LIFF_ID}`
-                                            }
+                                            type: "text",
+                                            text: "ส่งให้เพื่อน",
+                                            color: "#111111",
+                                            size: "sm",
+                                            align: "center"
                                         }
                                     ]
                                 },
