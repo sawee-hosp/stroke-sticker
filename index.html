@@ -380,37 +380,44 @@ async function shareMessage(sticker) {
                 type: "bubble",
                 size: "mega",
                 hero: heroBlock,
-                footer: {
-                    type: "box",
-                    layout: "vertical",
-                    spacing: "sm",
-                    paddingAll: "md",
-                    backgroundColor: sticker.flexBG || '#FFFFFF',
-                    // [แก้ไข] ย้าย align มาไว้ที่นี่ เพื่อจัดกลางให้ component ลูกทั้งหมด
-                    align: "center",
-                    contents: [
-                        {
-                            type: "button",
-                            style: "primary",
-                            color: "#007BFF",
-                            height: "sm",
-                            action: {
-                                type: "uri",
-                                label: "สร้างและแชร์สติกเกอร์นี้",
-                                uri: `https://liff.line.me/${LIFF_ID}`
-                            }
-                        },
-                        {
-                            type: "text",
-                            text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-                            size: "xxs",
-                            color: "#AAAAAA",
-                            margin: "md",
-                            // [แก้ไข] ลบ align: "center" ออกจากตรงนี้
-                            wrap: true // เพิ่ม wrap เผื่อข้อความยาว
-                        }
-                    ]
+footer: {
+    type: "box",
+    layout: "vertical",
+    spacing: "sm",
+    paddingAll: "md",
+    backgroundColor: sticker.flexBG || '#FFFFFF',
+    alignItems: "center",
+    contents: [
+        {
+            type: "box",
+            layout: "vertical",
+            maxWidth: "200px",
+            contents: [
+                {
+                    type: "button",
+                    style: "secondary",
+                    color: "#FFFFFF",
+                    height: "xs",
+                    action: {
+                        type: "uri",
+                        label: "ส่งสติกเกอร์ให้เพื่อน",
+                        uri: `https://liff.line.me/${LIFF_ID}`,
+                    },
+                    size: "sm"
                 }
+            ]
+        },
+        {
+            type: "text",
+            text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+            size: "xxs",
+            color: "#AAAAAA",
+            margin: "md",
+            wrap: true,
+            align: "center"
+        }
+    ]
+}
             }
         };
         messagesToSend.push(imageFlex);
