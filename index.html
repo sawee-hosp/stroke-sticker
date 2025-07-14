@@ -167,7 +167,7 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <p>กำลังโหลดคลังสติกเกอร์ รอสักครู่อย่าเพิ่งปิดนะครับ</p>
+        <p>กำลังโหลดคลังสติกเกอร์ รอสักครู่อย่าเพิ่งปิดนะครับบบบบบ</p>
     </div>
 
     <div class="main-container" id="app-content" style="display: none;">
@@ -365,20 +365,26 @@
         } 
         // --- Image Flex Message ---
         else {
+            // Conditionally build the hero block
+            const heroBlock = {
+                type: "image",
+                url: sticker.imageURL,
+                size: "full",
+                aspectRatio: "444:400",
+                aspectMode: "fit"
+            };
+            // Only add action if linkURL exists and is not empty
+            if (sticker.linkURL) {
+                heroBlock.action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
+            }
+
             const imageFlex = {
                 type: "flex",
                 altText: "เพื่อนส่งสติกเกอร์ห่วงใยมาให้คุณ",
                 contents: {
                     type: "bubble",
                     size: "giga",
-                    hero: {
-                        type: "image",
-                        url: sticker.imageURL,
-                        size: "full",
-                        aspectRatio: "444:400",
-                        aspectMode: "fit",
-                        action: { type: "uri", label: "action", uri: sticker.linkURL }
-                    },
+                    hero: heroBlock, // Use the dynamically created hero block
                     footer: {
                         type: "box",
                         layout: "vertical",
