@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังสติกเกอร์สวีรู้ทันสโตรก</title>
-    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
@@ -170,6 +169,7 @@
         </div>
     </div>
 
+<script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
 <script>
     // --- CONFIGURATION ---
     const LIFF_ID = "2005789397-37lemBgX";
@@ -179,7 +179,7 @@
     let currentUserProfile = {};
 
     // --- INITIALIZATION ---
-    window.onload = async () => {
+    async function initializeLiff() {
         try {
             document.getElementById('loader').style.display = 'block';
             await liff.init({ liffId: LIFF_ID });
@@ -193,7 +193,7 @@
             console.error("Initialization Failed:", error);
             document.getElementById('loader').innerHTML = `<p>เกิดข้อผิดพลาด: ${error.message}</p>`;
         }
-    };
+    }
 
     async function fetchStickers() {
         try {
@@ -351,6 +351,9 @@
             console.error("Log/Increment request failed:", error);
         }
     }
+
+    // --- APP ENTRY POINT ---
+    initializeLiff();
 
 </script>
 </body>
