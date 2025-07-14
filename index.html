@@ -277,50 +277,77 @@
     async function shareMessage(sticker) {
         const userMessage = document.getElementById('modal-text-input').value;
 
-        // Message 1: The Sticker Image
-        const imageMessage = {
-            type: "image",
-            originalContentUrl: sticker.imageURL,
-            previewImageUrl: sticker.imageURL // Use the same URL for preview
-        };
-
-        // Message 2: The Text with Quick Reply
-        const textMessage = {
-            type: "text",
-            text: userMessage,
-            quickReply: {
-                items: [
-                    {
-                        type: "action",
-                        action: {
-                            type: "uri",
-                            label: "แชร์สติกเกอร์นี้ต่อ",
-                            uri: `https://liff.line.me/${LIFF_ID}`
+        // Create a single, robust Flex Message that contains everything
+        const flexMessage = {
+            type: "flex",
+            altText: "เพื่อนส่งสติกเกอร์ห่วงใยมาให้คุณ",
+            contents: {
+                type: "bubble",
+                // The main image
+                hero: {
+                    type: "image",
+                    url: sticker.imageURL,
+                    size: "full",
+                    aspectRatio: "1:1",
+                    aspectMode: "cover"
+                },
+                // The user's text message
+                body: {
+                    type: "box",
+                    layout: "vertical",
+                    contents: [
+                        {
+                            type: "text",
+                            text: userMessage,
+                            wrap: true,
+                            size: "md"
                         }
-                    },
-                    {
-                        type: "action",
-                        action: {
-                            type: "uri",
-                            label: "เป็นเพื่อนกับเรา",
-                            uri: "https://lin.ee/MjUwBob"
+                    ]
+                },
+                // The buttons that act like Quick Replies
+                footer: {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    contents: [
+                        {
+                            type: "button",
+                            style: "link",
+                            height: "sm",
+                            action: {
+                                type: "uri",
+                                label: "แชร์สติกเกอร์นี้ต่อ",
+                                uri: `https://liff.line.me/${LIFF_ID}`
+                            }
+                        },
+                        {
+                            type: "button",
+                            style: "link",
+                            height: "sm",
+                            action: {
+                                type: "uri",
+                                label: "เป็นเพื่อนกับเรา",
+                                uri: "https://lin.ee/MjUwBob"
+                            }
+                        },
+                        {
+                            type: "button",
+                            style: "link",
+                            height: "sm",
+                            action: {
+                                type: "uri",
+                                label: "ประเมินสโตรก",
+                                uri: "https://liff.line.me/2005789397-WRm1lYd9"
+                            }
                         }
-                    },
-                    {
-                        type: "action",
-                        action: {
-                            type: "uri",
-                            label: "ประเมินสโตรก",
-                            uri: "https://liff.line.me/2005789397-WRm1lYd9"
-                        }
-                    }
-                ]
+                    ]
+                }
             }
         };
 
         try {
-            // Send both messages together
-            const result = await liff.shareTargetPicker([imageMessage, textMessage]);
+            // Send the single Flex Message
+            const result = await liff.shareTargetPicker([flexMessage]);
             
             if (result) {
                 // Share was successful
