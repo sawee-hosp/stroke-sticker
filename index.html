@@ -370,8 +370,8 @@
                 type: "image",
                 url: sticker.imageURL,
                 size: "full",
-                aspectRatio: "444:400",
-                aspectMode: "fit"
+                aspectMode: "fit" // Use 'fit' to ensure the image is not cropped
+                // REMOVED: aspectRatio to prevent validation errors
             };
             // Only add action if linkURL exists and is not empty
             if (sticker.linkURL) {
