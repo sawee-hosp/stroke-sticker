@@ -15,6 +15,9 @@
             --text-color: #333;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             --border-radius: 12px;
+            --badge-popular-bg: #dc2626; /* red-600 */
+            --badge-new-bg: #2563eb; /* blue-600 */
+            --badge-video-bg: #16a34a; /* green-600 */
         }
         body {
             font-family: "Noto Sans Thai", sans-serif;
@@ -43,6 +46,19 @@
         .daily-sticker-card:hover { transform: translateY(-5px); }
         .daily-sticker-card img { width: 100%; border-radius: 8px; }
 
+        .filter-container {
+            margin-bottom: 16px;
+        }
+        .category-filter {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background-color: white;
+            font-family: "Noto Sans Thai", sans-serif;
+            font-size: 1em;
+        }
+
         .sticker-library-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -61,18 +77,20 @@
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
-        .stat-badge {
+        .sticker-badge {
             position: absolute;
-            top: -5px;
-            left: -5px;
-            background-color: rgba(0, 0, 0, 0.7);
+            top: 5px;
+            left: 5px;
             color: white;
-            font-size: 0.75em;
+            font-size: 0.7em;
             font-weight: bold;
             padding: 3px 8px;
             border-radius: 10px;
-            border: 1px solid white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
+        .badge-popular { background-color: var(--badge-popular-bg); }
+        .badge-new { background-color: var(--badge-new-bg); }
+        .badge-video { background-color: var(--badge-video-bg); }
 
         /* --- Modal --- */
         .modal-overlay {
@@ -148,7 +166,7 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <p>กำลังโหลดคลังสติกเกอร์...</p>
+        <p>กำลังโหลดคลังสติกเกอร์ รอสักครู่อย่างเพิ่งปิดนะครับบบบบบ</p>
     </div>
 
     <div class="main-container" id="app-content" style="display: none;">
@@ -156,6 +174,9 @@
         <div id="daily-sticker-container"></div>
 
         <h2 class="section-title" style="margin-top: 32px;">คลังสติกเกอร์</h2>
+        <div class="filter-container">
+            <select id="category-filter" class="category-filter"></select>
+        </div>
         <div class="sticker-library-grid" id="sticker-library-container"></div>
     </div>
 
@@ -173,13 +194,13 @@
 <script>
     // --- CONFIGURATION ---
     const LIFF_ID = "2005789397-37lemBgX";
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec"; // <-- ใส่ URL ที่ถูกต้องของคุณ
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec";
 
     let allStickers = [];
     let currentUserProfile = {};
 
     // --- INITIALIZATION ---
-    async function initializeLiff() {
+    async function main() {
         try {
             document.getElementById('loader').style.display = 'block';
             await liff.init({ liffId: LIFF_ID });
@@ -201,7 +222,8 @@
             const result = await response.json();
             if (result.status === 'success') {
                 allStickers = result.data;
-                renderUI();
+                populateCategoryFilter();
+                renderUI(); // Initial render with "All"
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
             } else {
@@ -213,45 +235,80 @@
         }
     }
 
-    // --- UI RENDERING ---
-    function renderUI() {
-        const todayThai = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
-        
-        const dailyStickers = allStickers.filter(s => s.category === todayThai);
-        const otherStickers = allStickers.filter(s => s.category !== todayThai);
+    // --- UI RENDERING & FILTER ---
+    function populateCategoryFilter() {
+        const filterSelect = document.getElementById('category-filter');
+        const categories = ['ทั้งหมด', ...new Set(allStickers.map(s => s.category))];
+        filterSelect.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        filterSelect.onchange = () => renderUI(filterSelect.value);
+    }
 
+    function renderUI(filterCategory = 'ทั้งหมด') {
+        // Daily Sticker (always random from its category)
+        const todayThai = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
+        const dailyStickers = allStickers.filter(s => s.category === todayThai);
         const dailyContainer = document.getElementById('daily-sticker-container');
         dailyContainer.innerHTML = '';
         if (dailyStickers.length > 0) {
             const randomDailySticker = dailyStickers[Math.floor(Math.random() * dailyStickers.length)];
-            dailyContainer.appendChild(createStickerElement(randomDailySticker, true));
+            dailyContainer.appendChild(createStickerElement(randomDailySticker, { isDaily: true }));
         } else {
             dailyContainer.innerHTML = '<p>ไม่มีสติกเกอร์สำหรับวันนี้</p>';
         }
 
+        // Sticker Library
         const libraryContainer = document.getElementById('sticker-library-container');
         libraryContainer.innerHTML = '';
-        otherStickers
-            .sort((a, b) => b.stat - a.stat)
-            .forEach(sticker => libraryContainer.appendChild(createStickerElement(sticker, false)));
+
+        const popularStickers = [...allStickers].sort((a, b) => (b.stat || 0) - (a.stat || 0)).slice(0, 3).map(s => s.stickerID);
+        const newStickers = [...allStickers].slice(-3).map(s => s.stickerID);
+        
+        const stickersToDisplay = (filterCategory === 'ทั้งหมด')
+            ? allStickers
+            : allStickers.filter(s => s.category === filterCategory);
+
+        stickersToDisplay.forEach(sticker => {
+            const options = {
+                isPopular: popularStickers.includes(sticker.stickerID),
+                isNew: newStickers.includes(sticker.stickerID)
+            };
+            libraryContainer.appendChild(createStickerElement(sticker, options));
+        });
     }
 
-    function createStickerElement(sticker, isDaily) {
+    function createStickerElement(sticker, options = {}) {
+        const { isDaily = false, isPopular = false, isNew = false } = options;
         const container = document.createElement('div');
         container.className = isDaily ? 'daily-sticker-card' : 'sticker-item';
         
         const img = document.createElement('img');
-        img.src = sticker.imageURL;
+        img.src = sticker.previewURL || sticker.imageURL;
         img.alt = sticker.text.substring(0, 30);
         img.loading = 'lazy';
-        
         container.appendChild(img);
 
         if (!isDaily) {
-            const badge = document.createElement('div');
-            badge.className = 'stat-badge';
-            badge.textContent = sticker.stat || 0;
-            container.appendChild(badge);
+            let badgeText = '';
+            let badgeClass = '';
+
+            // Priority: Video > Popular > New
+            if (sticker.category === 'วิดีโอ') {
+                badgeText = 'ส่งวิดีโอ';
+                badgeClass = 'badge-video';
+            } else if (isPopular) {
+                badgeText = 'ได้รับความนิยม';
+                badgeClass = 'badge-popular';
+            } else if (isNew) {
+                badgeText = 'มาใหม่';
+                badgeClass = 'badge-new';
+            }
+            
+            if (badgeText) {
+                const badge = document.createElement('div');
+                badge.className = `sticker-badge ${badgeClass}`;
+                badge.textContent = badgeText;
+                container.appendChild(badge);
+            }
         }
 
         container.onclick = () => openModal(sticker);
@@ -260,12 +317,9 @@
 
     // --- MODAL & SHARING ---
     function openModal(sticker) {
-        document.getElementById('modal-sticker-image').src = sticker.imageURL;
+        document.getElementById('modal-sticker-image').src = sticker.previewURL || sticker.imageURL;
         document.getElementById('modal-text-input').value = sticker.text;
-        
-        const shareButton = document.getElementById('modal-share-button');
-        shareButton.onclick = () => shareMessage(sticker);
-
+        document.getElementById('modal-share-button').onclick = () => shareMessage(sticker);
         document.getElementById('share-modal').classList.add('visible');
     }
 
@@ -273,90 +327,101 @@
         document.getElementById('share-modal').classList.remove('visible');
     }
 
-    // --- [START] UPDATED SHARE FUNCTION ---
     async function shareMessage(sticker) {
         const userMessage = document.getElementById('modal-text-input').value;
+        let messagesToSend = [];
 
-        // Create a single, robust Flex Message that contains everything
-        const flexMessage = {
-            type: "flex",
-            altText: "เพื่อนส่งสติกเกอร์ห่วงใยมาให้คุณ",
-            contents: {
-                type: "bubble",
-                // The main image
-                hero: {
-                    type: "image",
-                    url: sticker.imageURL,
-                    size: "full",
-                    aspectRatio: "1:1",
-                    aspectMode: "cover"
-                },
-                // The user's text message
-                body: {
-                    type: "box",
-                    layout: "vertical",
-                    contents: [
-                        {
-                            type: "text",
-                            text: userMessage,
-                            wrap: true,
-                            size: "md"
-                        }
-                    ]
-                },
-                // The buttons that act like Quick Replies
-                footer: {
-                    type: "box",
-                    layout: "vertical",
-                    spacing: "sm",
-                    contents: [
-                        {
-                            type: "button",
-                            style: "link",
-                            height: "sm",
-                            action: {
-                                type: "uri",
-                                label: "แชร์สติกเกอร์นี้ต่อ",
-                                uri: `https://liff.line.me/${LIFF_ID}`
+        // --- Video Flex Message ---
+        if (sticker.category === 'วิดีโอ') {
+            const videoFlex = {
+                type: "flex",
+                altText: "เพื่อนส่งวิดีโอห่วงใยมาให้คุณ",
+                contents: {
+                    type: "bubble",
+                    body: {
+                        type: "box",
+                        layout: "vertical",
+                        paddingAll: "0px",
+                        contents: [
+                            {
+                                type: "video",
+                                url: sticker.imageURL, // Using imageURL for video as requested
+                                previewUrl: sticker.previewURL || sticker.imageURL, // Use a preview if available
+                                altContent: {
+                                    type: "image",
+                                    size: "full",
+                                    aspectRatio: "16:9",
+                                    aspectMode: "cover",
+                                    url: sticker.previewURL || sticker.imageURL
+                                },
+                                action: { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL }
                             }
-                        },
-                        {
-                            type: "button",
-                            style: "link",
-                            height: "sm",
-                            action: {
-                                type: "uri",
-                                label: "เป็นเพื่อนกับเรา",
-                                uri: "https://lin.ee/MjUwBob"
-                            }
-                        },
-                        {
-                            type: "button",
-                            style: "link",
-                            height: "sm",
-                            action: {
-                                type: "uri",
-                                label: "ประเมินสโตรก",
-                                uri: "https://liff.line.me/2005789397-WRm1lYd9"
-                            }
-                        }
-                    ]
+                        ]
+                    }
                 }
-            }
-        };
+            };
+            messagesToSend.push(videoFlex);
+        } 
+        // --- Image Flex Message ---
+        else {
+            const imageFlex = {
+                type: "flex",
+                altText: "เพื่อนส่งสติกเกอร์ห่วงใยมาให้คุณ",
+                contents: {
+                    type: "bubble",
+                    size: "giga",
+                    hero: {
+                        type: "image",
+                        url: sticker.imageURL,
+                        size: "full",
+                        aspectRatio: "444:400",
+                        aspectMode: "fit",
+                        action: { type: "uri", label: "action", uri: sticker.linkURL }
+                    },
+                    footer: {
+                        type: "box",
+                        layout: "vertical",
+                        spacing: "none",
+                        margin: "none",
+                        backgroundColor: sticker.flexBG || '#FFFFFF',
+                        contents: [
+                            {
+                                type: "button",
+                                style: "primary",
+                                color: "#FFFFFF",
+                                height: "xs",
+                                action: {
+                                    type: "uri",
+                                    label: "แชร์สติกเกอร์นี้ให้เพื่อน",
+                                    uri: `https://liff.line.me/${LIFF_ID}`
+                                }
+                            },
+                            {
+                                type: "text",
+                                text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+                                size: "xxxxs",
+                                color: "#AAAAAA",
+                                align: "center",
+                                margin: "sm"
+                            }
+                        ]
+                    }
+                }
+            };
+            messagesToSend.push(imageFlex);
+        }
+        
+        // Add the plain text message
+        const textMessage = { type: "text", text: userMessage };
+        messagesToSend.push(textMessage);
 
         try {
-            // Send the single Flex Message
-            const result = await liff.shareTargetPicker([flexMessage]);
-            
+            const result = await liff.shareTargetPicker(messagesToSend);
             if (result) {
-                // Share was successful
                 closeModal();
                 await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
-                // Close the LIFF window and return to the chat
                 liff.closeWindow();
             } else {
-                // Share was cancelled by the user
                 console.log("Share cancelled by user.");
             }
         } catch (error) {
@@ -364,7 +429,6 @@
             alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
         }
     }
-    // --- [END] UPDATED SHARE FUNCTION ---
 
     async function logAndIncrementStat(stickerID, userID) {
         try {
@@ -380,7 +444,7 @@
     }
 
     // --- APP ENTRY POINT ---
-    initializeLiff();
+    main();
 
 </script>
 </body>
