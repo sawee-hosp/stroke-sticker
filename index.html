@@ -3,129 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ส่งสติกเกอร์ไลน์ประจำวัน</title>
-    
-    <!-- LINE LIFF SDK -->
+    <title>คลังสติกเกอร์สวีรู้ทันสโตรก</title>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-    
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
-        /* --- Base Styles --- */
         :root {
             --primary-color: #007BFF;
-            --primary-hover-color: #0056b3;
             --background-color: #f0f2f5;
-            --container-bg-color: #ffffff;
+            --card-bg-color: #ffffff;
             --text-color: #333;
-            --secondary-text-color: #6c757d;
-            --border-radius: 12px;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
         }
-
         body {
             font-family: "Noto Sans Thai", sans-serif;
             background-color: var(--background-color);
             margin: 0;
             padding: 16px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
         }
-
-        /* --- Main Container --- */
-        .sticker-container {
-            background-color: var(--container-bg-color);
+        .main-container { max-width: 600px; margin: 0 auto; }
+        .section-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        .daily-sticker-card {
+            background-color: var(--card-bg-color);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            overflow: hidden;
-        }
-
-        /* --- Header --- */
-        .sticker-header {
-            padding: 20px;
-            background: linear-gradient(135deg, #f8f9fa, #e0e0e0);
-        }
-        .sticker-header h1 {
-            margin: 0;
-            font-size: 1.8em;
-            color: #003366;
-            font-weight: 700;
-        }
-        .sticker-header p {
-            margin: 4px 0 0;
-            color: var(--secondary-text-color);
-            font-size: 0.9em;
-        }
-
-        /* --- Sticker Image --- */
-        .sticker-image-wrapper {
-            padding: 20px;
+            padding: 16px;
+            margin-bottom: 24px;
             cursor: pointer;
             transition: transform 0.2s ease;
         }
-        .sticker-image-wrapper:hover {
-            transform: scale(1.03);
+        .daily-sticker-card:hover { transform: translateY(-5px); }
+        .daily-sticker-card img { width: 100%; border-radius: 8px; }
+
+        .sticker-library-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
         }
-        #themeImage {
+        .sticker-item {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .sticker-item:hover { transform: scale(1.05); }
+        .sticker-item img {
             width: 100%;
-            max-width: 250px;
-            height: auto;
-            border-radius: var(--border-radius);
-            display: block;
-            margin: 0 auto;
-        }
-
-        /* --- Body Content --- */
-        .sticker-body {
-            padding: 0 20px 20px;
-        }
-        .description {
-            font-size: 0.95em;
-            color: var(--text-color);
-            line-height: 1.6;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        /* --- Share Input Section --- */
-        .share-input-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        #userProfile {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+            aspect-ratio: 1 / 1;
             object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
-        #additionalMessage {
-            flex-grow: 1;
-            height: 60px;
+        .stat-badge {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 0.75em;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 10px;
+            border: 1px solid white;
+        }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000;
+        }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .modal-content img { width: 100%; max-width: 250px; margin-bottom: 16px; border-radius: 8px; }
+        .modal-content textarea {
+            width: 100%;
+            box-sizing: border-box;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #ced4da;
+            border: 1px solid #ccc;
+            min-height: 80px;
+            margin-bottom: 16px;
             font-family: "Noto Sans Thai", sans-serif;
-            font-size: 0.9em;
-            resize: none;
         }
-        #additionalMessage:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-        }
-
-        /* --- Button --- */
-        .share-button {
+        .modal-button {
             display: block;
             width: 100%;
             padding: 14px;
@@ -136,245 +123,235 @@
             cursor: pointer;
             font-size: 1.1em;
             font-weight: 700;
-            transition: background-color 0.2s ease;
         }
-        .share-button:hover {
-            background-color: var(--primary-hover-color);
+        .close-modal {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: none; border: none;
+            font-size: 2em; color: white;
+            cursor: pointer;
         }
-
-        /* --- Footer --- */
-        .sticker-footer {
-            padding: 12px;
-            font-size: 0.75em;
-            color: #999;
-            background-color: #f8f9fa;
-        }
-
-        /* --- Loading Spinner --- */
-        .loader {
+        
+        /* --- Loader --- */
+        #loader { text-align: center; padding: 50px; }
+        .spinner {
             border: 5px solid #f3f3f3;
             border-top: 5px solid var(--primary-color);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 50px; height: 50px;
             animation: spin 1s linear infinite;
-            margin: 50px auto;
+            margin: 0 auto 16px;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #loading {
-            text-align: center;
-            padding: 50px;
-        }
-
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="loading">
-        <div class="loader"></div>
-        <p>กำลังโหลดข้อมูล...</p>
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>กำลังโหลดคลังสติกเกอร์...</p>
     </div>
 
-    <div class="sticker-container" style="display: none;">
-        <header class="sticker-header">
-            <h1 id="themeText"></h1>
-            <p>สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร</p>
-        </header>
+    <div class="main-container" id="app-content" style="display: none;">
+        <h2 class="section-title">สติกเกอร์ประจำวันนี้</h2>
+        <div id="daily-sticker-container"></div>
 
-        <div class="sticker-image-wrapper" onclick="shareFlexMessage()" title="คลิกเพื่อแชร์สติกเกอร์">
-            <img id="themeImage" src="" alt="สติกเกอร์ประจำวัน">
+        <h2 class="section-title" style="margin-top: 32px;">คลังสติกเกอร์</h2>
+        <div class="sticker-library-grid" id="sticker-library-container"></div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="modal-overlay" id="share-modal">
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+        <div class="modal-content">
+            <img id="modal-sticker-image" src="" alt="Sticker Preview">
+            <textarea id="modal-text-input"></textarea>
+            <button id="modal-share-button" class="modal-button">ส่งให้เพื่อน</button>
         </div>
-
-        <div class="sticker-body">
-            <p class="description">
-                ส่งสติกเกอร์ไลน์ประจำวันให้เพื่อนของคุณ เพื่อให้เพื่อนได้ตระหนักและใส่ใจอาการสโตรกที่อาจเกิดกับใครก็ได้
-            </p>
-
-            <div class="share-input-section">
-                <img id="userProfile" src="https://placehold.co/50x50/EFEFEF/AAAAAA?text=User" alt="User Profile Picture">
-                <textarea id="additionalMessage" placeholder="พิมพ์ข้อความถึงเพื่อนที่นี่..."></textarea>
-            </div>
-            
-            <button class="share-button" onclick="shareFlexMessage()">แชร์สติกเกอร์ให้เพื่อน</button>
-        </div>
-
-        <footer class="sticker-footer">
-            <p>PDPA:รพ.สวีใช้ข้อมูลLineของท่านในการประมวลผล<br>
-            "สวีรู้ทันสโตรก" จัดทำโดยทีมดูแลผู้ป่วยโรคหลอดเลือดสมอง รพ.สวี จ.ชุมพร</p>
-        </footer>
     </div>
 
 <script>
-    // --- Configuration ---
+    // --- CONFIGURATION ---
     const LIFF_ID = "2005789397-37lemBgX";
-    // !!! สำคัญ: นำ URL ของ Web App ที่ได้จาก Google Apps Script มาวางที่นี่ !!!
-    const GAS_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"; 
-    const DEFAULT_SHARE_MESSAGE = "ได้ส่งความห่วงใยมาถึงคุณ มารู้จักอาการสโตรกกันหน่อย";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec"; // <-- สำคัญ: ใส่ URL ใหม่ของคุณที่นี่
 
-    // --- DOM Elements ---
-    const loadingView = document.getElementById('loading');
-    const mainContainer = document.querySelector('.sticker-container');
-    const themeImageElem = document.getElementById('themeImage');
-    const themeTextElem = document.getElementById('themeText');
-    const userProfileElem = document.getElementById('userProfile');
-    const messageBox = document.getElementById('additionalMessage');
+    let allStickers = [];
+    let currentUserProfile = {};
 
-    // --- Daily Themes Data ---
-    const dailyThemes = {
-        0: { imageURL: "https://i.ibb.co/hWn6CYR/26.png", color1: "#ff8080", color2: "#cc0000", color3: "#ffcccc", word1: "สวัสดีวันอาทิตย์", word2: "แขนขา อ่อนแรง", word3: "อาจเป็นอาการของสโตรก" },
-        1: { imageURL: "https://i.ibb.co/RBbPtxC/13.png", color1: "#ffdb4d", color2: "#cca300", color3: "#ffffe6", word1: "สวัสดีวันจันทร์", word2: "พูดไม่ออก ลิ้นพันกัน", word3: "อาจเป็นอาการของสโตรก" },
-        2: { imageURL: "https://i.ibb.co/fxGrR4H/15.png", color1: "#ff99dd", color2: "#e60099", color3: "#ffe6f2", word1: "สวัสดีวันอังคาร", word2: "มีโรคประจำตัว", word3: "เสี่ยงสโตรกมากขึ้น" },
-        3: { imageURL: "https://i.ibb.co/h2TKRdM/18.png", color1: "#5cd65c", color2: "#248f24", color3: "#d6f5d6", word1: "สวัสดีวันพุธ", word2: "หน้าเบี้ยว ปากเบี้ยว", word3: "อาจเป็นอาการของสโตรก" },
-        4: { imageURL: "https://i.ibb.co/rpQJWS3/20.png", color1: "#ff704d", color2: "#cc2900", color3: "#ffd6cc", word1: "สวัสดีวันพฤหัสฯ", word2: "ตามัว มองไม่ชัด", word3: "อาจเป็นอาการของสโตรก" },
-        5: { imageURL: "https://i.ibb.co/GQMH1cm/27.png", color1: "#66b3ff", color2: "#0066cc", color3: "#cce6ff", word1: "สวัสดีวันศุกร์", word2: "หลอดเลือดสมองตีบ", word3: "รีบมาให้ทัน 4.5 ชม." },
-        6: { imageURL: "https://i.ibb.co/RbVNc6g/24.png", color1: "#df80ff", color2: "#8600b3", color3: "#f9e6ff", word1: "สวัสดีวันเสาร์", word2: "หมั่นประเมินอาการ", word3: "โรคหลอดเลือดสมอง" }
-    };
-
-    // --- Functions ---
-
-    async function initializeLiff() {
+    // --- INITIALIZATION ---
+    window.onload = async () => {
         try {
+            document.getElementById('loader').style.display = 'block';
             await liff.init({ liffId: LIFF_ID });
             if (!liff.isLoggedIn()) {
                 liff.login();
                 return;
             }
-            const profile = await liff.getProfile();
-            userProfileElem.src = profile.pictureUrl;
-            userProfileElem.alt = profile.displayName;
-            setupAppView();
+            currentUserProfile = await liff.getProfile();
+            await fetchStickers();
         } catch (error) {
-            console.error("LIFF Initialization failed.", error);
-            loadingView.innerHTML = "<p>เกิดข้อผิดพลาดในการโหลดแอป กรุณาลองใหม่อีกครั้ง</p>";
+            console.error("Initialization Failed:", error);
+            document.getElementById('loader').innerHTML = `<p>เกิดข้อผิดพลาด: ${error.message}</p>`;
+        }
+    };
+
+    async function fetchStickers() {
+        try {
+            const response = await fetch(GAS_WEB_APP_URL);
+            const result = await response.json();
+            if (result.status === 'success') {
+                allStickers = result.data;
+                renderUI();
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('app-content').style.display = 'block';
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            console.error("Fetch Stickers Failed:", error);
+            document.getElementById('loader').innerHTML = `<p>ไม่สามารถโหลดข้อมูลสติกเกอร์ได้: ${error.message}</p>`;
         }
     }
-    
-    function setupAppView() {
-        const dayIndex = new Date().getDay();
-        const theme = dailyThemes[dayIndex] || dailyThemes[1];
-        themeImageElem.src = theme.imageURL;
-        themeTextElem.innerText = theme.word1;
-        messageBox.value = DEFAULT_SHARE_MESSAGE;
-        messageBox.addEventListener('focus', () => { if (messageBox.value === DEFAULT_SHARE_MESSAGE) messageBox.value = ''; });
-        messageBox.addEventListener('blur', () => { if (messageBox.value.trim() === '') messageBox.value = DEFAULT_SHARE_MESSAGE; });
-        loadingView.style.display = 'none';
-        mainContainer.style.display = 'block';
-    }
 
-    function getTodayTheme() {
-        const dayIndex = new Date().getDay();
-        return dailyThemes[dayIndex] || dailyThemes[1];
-    }
+    // --- UI RENDERING ---
+    function renderUI() {
+        const todayThai = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
+        
+        const dailyStickers = allStickers.filter(s => s.category === todayThai);
+        const otherStickers = allStickers.filter(s => s.category !== todayThai);
 
-    /**
-     * NEW: Sends log data to Google Apps Script
-     * @param {object} logData - The data to be logged.
-     */
-    async function logShareEvent(logData) {
-        if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL === "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec") {
-            console.warn("GAS Web App URL is not set. Skipping log.");
-            return;
+        // Render Daily Sticker
+        const dailyContainer = document.getElementById('daily-sticker-container');
+        dailyContainer.innerHTML = '';
+        if (dailyStickers.length > 0) {
+            const randomDailySticker = dailyStickers[Math.floor(Math.random() * dailyStickers.length)];
+            const dailyEl = createStickerElement(randomDailySticker, true);
+            dailyContainer.appendChild(dailyEl);
+        } else {
+            dailyContainer.innerHTML = '<p>ไม่มีสติกเกอร์สำหรับวันนี้</p>';
         }
+
+        // Render Sticker Library
+        const libraryContainer = document.getElementById('sticker-library-container');
+        libraryContainer.innerHTML = '';
+        otherStickers
+            .sort((a, b) => b.stat - a.stat) // Sort by popularity
+            .forEach(sticker => {
+                const stickerEl = createStickerElement(sticker, false);
+                libraryContainer.appendChild(stickerEl);
+            });
+    }
+
+    function createStickerElement(sticker, isDaily) {
+        const container = document.createElement('div');
+        container.className = isDaily ? 'daily-sticker-card' : 'sticker-item';
+        
+        const img = document.createElement('img');
+        img.src = sticker.imageURL;
+        img.alt = sticker.text.substring(0, 30);
+        img.loading = 'lazy';
+        
+        container.appendChild(img);
+
+        if (!isDaily) {
+            const badge = document.createElement('div');
+            badge.className = 'stat-badge';
+            badge.textContent = sticker.stat || 0;
+            container.appendChild(badge);
+        }
+
+        container.onclick = () => openModal(sticker);
+        return container;
+    }
+
+    // --- MODAL & SHARING ---
+    function openModal(sticker) {
+        document.getElementById('modal-sticker-image').src = sticker.imageURL;
+        document.getElementById('modal-text-input').value = sticker.text;
+        
+        // Set the share button's action dynamically
+        const shareButton = document.getElementById('modal-share-button');
+        shareButton.onclick = () => shareMessage(sticker);
+
+        document.getElementById('share-modal').classList.add('visible');
+    }
+
+    function closeModal() {
+        document.getElementById('share-modal').classList.remove('visible');
+    }
+
+    async function shareMessage(sticker) {
+        const userMessage = document.getElementById('modal-text-input').value;
+        
+        const flexMessage = {
+            type: "flex",
+            altText: "เพื่อนส่งสติกเกอร์ห่วงใยมาให้คุณ",
+            contents: {
+                type: "bubble",
+                body: {
+                    type: "box",
+                    layout: "vertical",
+                    paddingAll: "0px",
+                    contents: [{
+                        type: "image",
+                        url: sticker.imageURL,
+                        size: "full",
+                        aspectMode: "cover",
+                        aspectRatio: "1:1",
+                        action: { type: "uri", label: "action", uri: sticker.linkURL }
+                    }]
+                },
+                styles: {
+                    body: { backgroundColor: sticker.flexBG || "#ffffff" }
+                }
+            }
+        };
+
+        const textMessage = { type: "text", text: userMessage };
+
+        const quickReply = {
+            quickReply: {
+                items: [
+                    { type: "action", action: { type: "uri", label: "แชร์สติกเกอร์นี้ต่อ", uri: `https://liff.line.me/${LIFF_ID}` } },
+                    { type: "action", action: { type: "uri", label: "เป็นเพื่อนกับเรา", uri: "https://lin.ee/MjUwBob" } },
+                    { type: "action", action: { type: "uri", label: "ประเมินสโตรก", uri: "https://liff.line.me/2005789397-WRm1lYd9" } }
+                ]
+            }
+        };
+        
+        // Add quick reply to the text message
+        textMessage.quickReply = quickReply.quickReply;
+
+        try {
+            const result = await liff.shareTargetPicker([flexMessage, textMessage]);
+            if (result) {
+                // Share successful
+                closeModal();
+                await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
+                // Optionally show a success message before closing
+                liff.closeWindow();
+            } else {
+                console.log("Share cancelled by user.");
+            }
+        } catch (error) {
+            console.error("Share Failed:", error);
+            alert("เกิดข้อผิดพลาดในการแชร์");
+        }
+    }
+
+    async function logAndIncrementStat(stickerID, userID) {
         try {
             await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Important for sending to GAS from client-side
-                cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(logData)
+                mode: 'no-cors', // Important for GAS
+                body: JSON.stringify({ stickerID, userID })
             });
-            console.log("Log data sent successfully.");
+            console.log(`Logged and requested stat increment for ${stickerID}`);
         } catch (error) {
-            console.error("Failed to send log data:", error);
+            console.error("Log/Increment request failed:", error);
         }
     }
 
-    async function shareFlexMessage() {
-        if (!liff.isLoggedIn()) {
-            alert("กรุณาเข้าสู่ระบบก่อนแชร์");
-            liff.login();
-            return;
-        }
-
-        try {
-            const profile = await liff.getProfile();
-            const theme = getTodayTheme();
-            let additionalMessage = messageBox.value.trim() || DEFAULT_SHARE_MESSAGE;
-
-            const flexMessage = { /* ... Flex Message object remains the same ... */ 
-                type: "flex",
-                altText: `${profile.displayName} ได้ส่งสติกเกอร์สโตรกมาให้คุณ`,
-                contents: {
-                    type: "bubble",
-                    header: {
-                        type: "box", layout: "vertical", contents: [
-                            { type: "text", text: theme.word1, size: "lg", color: "#f2f2f2" },
-                            { type: "text", text: theme.word2, size: "xl", weight: "bold", wrap: true, color: "#ffffff", align: "center" },
-                            { type: "text", text: theme.word3, weight: "bold", color: "#ffffff" }
-                        ],
-                        background: { type: "linearGradient", angle: "0deg", startColor: theme.color1, endColor: theme.color2 },
-                        paddingAll: "md", alignItems: "center"
-                    },
-                    hero: {
-                        type: "image", url: theme.imageURL, size: "full", aspectRatio: "1:1", aspectMode: "fit",
-                        action: { type: "uri", uri: "https://liff.line.me/2005789397-WRm1lYd9", label: "ทำแบบประเมิน" }
-                    },
-                    body: {
-                        type: "box", layout: "horizontal", spacing: "md", contents: [
-                            {
-                                type: "box", layout: "vertical",
-                                contents: [{ type: "image", url: profile.pictureUrl, aspectRatio: "1:1", aspectMode: "cover", size: "full" }],
-                                cornerRadius: "100px", width: "60px", height: "60px"
-                            },
-                            {
-                                type: "box", layout: "vertical", flex: 4, contents: [
-                                    { type: "text", text: profile.displayName, weight: "bold" },
-                                    { type: "text", text: additionalMessage, style: "italic", color: "#999999", wrap: true, size: "sm" }
-                                ]
-                            }
-                        ],
-                        action: { type: "uri", label: "ส่งสติกเกอร์", uri: `https://liff.line.me/${LIFF_ID}` }
-                    },
-                    footer: {
-                        type: "box", layout: "vertical", spacing: "sm", contents: [
-                            { type: "button", style: "primary", height: "sm", action: { type: "uri", label: "ทำแบบประเมินสโตรก", uri: "https://liff.line.me/2005789397-WRm1lYd9" }, color: theme.color2 },
-                            { type: "button", style: "link", height: "sm", action: { type: "uri", label: "เป็นเพื่อนกับเรา", uri: "https://lin.ee/MjUwBob" } },
-                            { type: "text", text: "จัดทำโดย Stroke Care Team รพ.สวี", size: "xs", color: "#aaaaaa", align: "center", wrap: true }
-                        ]
-                    },
-                    styles: { hero: { backgroundColor: theme.color3 } }
-                }
-            };
-
-            if (liff.isApiAvailable('shareTargetPicker')) {
-                const result = await liff.shareTargetPicker([flexMessage]);
-                if (result) {
-                    // Sent successfully, now log the event
-                    await logShareEvent({
-                        userId: profile.userId,
-                        displayName: profile.displayName,
-                        stickerName: theme.word1,
-                        stickerUrl: theme.imageURL,
-                        message: additionalMessage
-                    });
-                    liff.closeWindow();
-                } else {
-                    console.log("Share Target Picker was cancelled by the user.");
-                }
-            } else {
-                alert("ฟังก์ชันแชร์ไม่พร้อมใช้งานบนอุปกรณ์ของคุณ");
-            }
-
-        } catch (error) {
-            console.error("Failed to send message:", error);
-            alert("เกิดข้อผิดพลาดในการส่งข้อความ");
-        }
-    }
-
-    window.onload = initializeLiff;
 </script>
 </body>
 </html>
