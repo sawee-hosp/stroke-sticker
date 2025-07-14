@@ -328,12 +328,13 @@
         document.getElementById('share-modal').classList.remove('visible');
     }
 
- async function shareMessage(sticker) {
-    const userMessage = document.getElementById('modal-text-input').value;
+async function shareMessage(sticker) {
+    const userMessage = document.getElementById('modal-text-input').value.trim();
     let messagesToSend = [];
 
-    // --- Video Flex Message (โครงสร้างถูกต้องแล้ว) ---
+    // --- Video Flex Message (ไม่มีปัญหานี้) ---
     if (sticker.category === 'วิดีโอ') {
+        // ... โครงสร้าง video flex ไม่ต้องแก้ไข ...
         const videoFlex = {
             type: "flex",
             altText: `เพื่อนส่งวิดีโอ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
@@ -354,86 +355,77 @@
                             aspectMode: "cover",
                             url: sticker.previewURL || sticker.imageURL
                         },
-                        action: {
-                            type: "uri",
-                            label: "ดูเพิ่มเติม",
-                            uri: sticker.linkURL
-                        }
+                        action: { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL }
                     }]
                 }
             }
         };
         messagesToSend.push(videoFlex);
     }
-    // --- Image Flex Message (แก้ไขแล้ว) ---
+    // --- Image Flex Message (แก้ไขจุดที่ผิด) ---
     else {
-        // สร้าง hero block แบบมีเงื่อนไข
         const heroBlock = {
             type: "image",
             url: sticker.imageURL,
             size: "full",
-            aspectMode: "fit" // 'fit' จะแสดงรูปเต็ม ไม่ตัดส่วนใดส่วนหนึ่ง
-            // ไม่จำเป็นต้องมี aspectRatio ในขนาด mega
+            aspectMode: "fit"
         };
-
-        // เพิ่ม action (ปุ่มกดบนรูป) ต่อเมื่อมี linkURL เท่านั้น
         if (sticker.linkURL) {
-            heroBlock.action = {
-                type: "uri",
-                label: "ดูเพิ่มเติม",
-                uri: sticker.linkURL
-            };
+            heroBlock.action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
         }
-
         const imageFlex = {
             type: "flex",
             altText: `เพื่อนส่งสติกเกอร์ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
             contents: {
                 type: "bubble",
-                // [แก้ไข] เปลี่ยนจาก 'giga' เป็น 'mega' เพื่อหลีกเลี่ยงข้อบังคับ aspectRatio ของ hero
                 size: "mega",
                 hero: heroBlock,
                 footer: {
                     type: "box",
                     layout: "vertical",
-                    spacing: "sm", // เพิ่มระยะห่างเล็กน้อยเพื่อความสวยงาม
-                    paddingAll: "md", // เพิ่ม padding ให้ขอบไม่ชิดเกินไป
+                    spacing: "sm",
+                    paddingAll: "md",
                     backgroundColor: sticker.flexBG || '#FFFFFF',
-                    contents: [{
-                        type: "button",
-                        style: "primary", // เปลี่ยนเป็น primary ให้เด่นขึ้น
-                        color: "#007BFF", // กำหนดสีให้ตรงกับธีมหลัก
-                        height: "sm",
-                        action: {
-                            type: "uri",
-                            label: "สร้างและแชร์สติกเกอร์นี้",
-                            uri: `https://liff.line.me/${LIFF_ID}`
+                    // [แก้ไข] ย้าย align มาไว้ที่นี่ เพื่อจัดกลางให้ component ลูกทั้งหมด
+                    align: "center",
+                    contents: [
+                        {
+                            type: "button",
+                            style: "primary",
+                            color: "#007BFF",
+                            height: "sm",
+                            action: {
+                                type: "uri",
+                                label: "สร้างและแชร์สติกเกอร์นี้",
+                                uri: `https://liff.line.me/${LIFF_ID}`
+                            }
+                        },
+                        {
+                            type: "text",
+                            text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+                            size: "xxs",
+                            color: "#AAAAAA",
+                            margin: "md",
+                            // [แก้ไข] ลบ align: "center" ออกจากตรงนี้
+                            wrap: true // เพิ่ม wrap เผื่อข้อความยาว
                         }
-                    }, {
-                        type: "text",
-                        text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-                        size: "xxs", // ปรับขนาดให้เล็กลงเล็กน้อย
-                        color: "#AAAAAA",
-                        align: "center",
-                        margin: "md" // เพิ่มระยะห่างด้านบน
-                    }]
+                    ]
                 }
             }
         };
         messagesToSend.push(imageFlex);
     }
 
-    // เพิ่มข้อความธรรมดาที่ผู้ใช้พิมพ์ต่อท้ายเสมอ
-    if (userMessage.trim() !== '') {
-        const textMessage = {
-            type: "text",
-            text: userMessage
-        };
-        messagesToSend.push(textMessage);
+    // เพิ่มข้อความที่ผู้ใช้พิมพ์ (ถ้ามี)
+    if (userMessage) {
+        messagesToSend.push({ type: "text", text: userMessage });
     }
 
-
     try {
+        if (messagesToSend.length === 0) {
+            alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้");
+            return;
+        }
         const result = await liff.shareTargetPicker(messagesToSend);
         if (result) {
             closeModal();
