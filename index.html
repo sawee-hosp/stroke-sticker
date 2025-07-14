@@ -370,7 +370,7 @@
 
         try {
             if (sticker.category === 'วิดีโอ') {
-                // [FIXED] ทำให้ Video Flex เรียบง่ายที่สุดเพื่อทดสอบ
+                // [FIXED] เพิ่ม Footer กลับเข้าไปใน Video Flex
                 const videoUrl = sticker.imageURL;
                 const previewImageUrl = sticker.previewURL;
 
@@ -395,11 +395,50 @@
                                     type: "video",
                                     url: videoUrl,
                                     previewUrl: previewImageUrl,
-                                    aspectRatio: "16:9" // เพิ่ม aspect ratio เพื่อความเสถียร
+                                    aspectRatio: "16:9"
+                                }
+                            ]
+                        },
+                        footer: {
+                            type: "box",
+                            layout: "vertical",
+                            spacing: "sm",
+                            paddingAll: "md",
+                            backgroundColor: "#FFFFFF",
+                            alignItems: "center",
+                            contents: [
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    maxWidth: "70%",
+                                    backgroundColor: "#FFFFFF",
+                                    cornerRadius: "md",
+                                    paddingAll: "sm",
+                                    action: {
+                                        type: "uri",
+                                        label: "ส่งให้เพื่อน",
+                                        uri: `https://liff.line.me/${LIFF_ID}`
+                                    },
+                                    contents: [
+                                        {
+                                            type: "text",
+                                            text: "ส่งให้เพื่อน",
+                                            color: "#111111",
+                                            size: "sm",
+                                            align: "center"
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: "text",
+                                    text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+                                    size: "xxs",
+                                    color: "#AAAAAA",
+                                    margin: "md",
+                                    wrap: true
                                 }
                             ]
                         }
-                        // ไม่มี footer เพื่อทดสอบการทำงานหลักก่อน
                     }
                 };
                 messagesToSend.push(videoFlex);
