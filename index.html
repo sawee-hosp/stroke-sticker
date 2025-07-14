@@ -118,7 +118,22 @@
             transition: transform 0.3s;
         }
         .modal-overlay.visible .modal-content { transform: scale(1); }
-        .modal-content img { width: 100%; max-width: 250px; margin-bottom: 16px; border-radius: 8px; }
+        /* --- CSS for Modal Media --- */
+        #modal-media-container {
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px; /* ให้มีพื้นที่แม้ยังไม่โหลด */
+        }
+        #modal-media-container img,
+        #modal-media-container video {
+            width: 100%;
+            max-width: 280px;
+            max-height: 280px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
         .modal-content textarea {
             width: 100%;
             box-sizing: border-box;
@@ -184,7 +199,8 @@
     <div class="modal-overlay" id="share-modal">
         <button class="close-modal" onclick="closeModal()">&times;</button>
         <div class="modal-content">
-            <img id="modal-sticker-image" src="" alt="Sticker Preview">
+            <!-- [FIXED] เปลี่ยนจาก img เป็น div container สำหรับรองรับทั้งภาพและวิดีโอ -->
+            <div id="modal-media-container"></div>
             <textarea id="modal-text-input"></textarea>
             <button id="modal-share-button" class="modal-button">ส่งให้เพื่อน</button>
         </div>
@@ -279,6 +295,7 @@
         container.className = isDaily ? 'daily-sticker-card' : 'sticker-item';
         
         const img = document.createElement('img');
+        // ใช้ previewURL ถ้ามี, ถ้าไม่มีใช้ imageURL
         img.src = sticker.previewURL || sticker.imageURL;
         img.alt = sticker.text.substring(0, 30);
         img.loading = 'lazy';
@@ -291,7 +308,7 @@
                 badgeText = 'ส่งวิดีโอ';
                 badgeClass = 'badge-video';
             } else if (isPopular) {
-                badgeText = 'ได้รับความนิยม';
+                badgeText = 'ยอดนิยม';
                 badgeClass = 'badge-popular';
             } else if (isNew) {
                 badgeText = 'มาใหม่';
@@ -311,147 +328,185 @@
     }
 
     // --- MODAL & SHARING ---
+    
+    // [FIXED] ปรับปรุงฟังก์ชัน openModal ให้รองรับทั้งภาพและวิดีโอ
     function openModal(sticker) {
-        document.getElementById('modal-sticker-image').src = sticker.previewURL || sticker.imageURL;
+        const mediaContainer = document.getElementById('modal-media-container');
+        mediaContainer.innerHTML = ''; // เคลียร์ของเก่าออกก่อน
+
+        if (sticker.category === 'วิดีโอ' && sticker.imageURL) {
+            // --- สร้าง element <video> ---
+            const video = document.createElement('video');
+            video.src = sticker.imageURL; // URL ของไฟล์วิดีโอ
+            video.controls = true;    // แสดงปุ่มควบคุม
+            video.autoplay = true;    // เล่นอัตโนมัติ
+            video.muted = true;       // ปิดเสียง (จำเป็นสำหรับ autoplay)
+            video.loop = true;        // เล่นวน
+            video.playsInline = true; // สำหรับมือถือ ให้เล่นในหน้าเว็บ
+            mediaContainer.appendChild(video);
+        } else {
+            // --- สร้าง element <img> สำหรับรูปภาพ ---
+            const img = document.createElement('img');
+            img.src = sticker.imageURL; // ใช้ imageURL เพื่อความคมชัด
+            mediaContainer.appendChild(img);
+        }
+
         document.getElementById('modal-text-input').value = sticker.text;
         document.getElementById('modal-share-button').onclick = () => shareMessage(sticker);
         document.getElementById('share-modal').classList.add('visible');
     }
 
     function closeModal() {
+        // หยุดการเล่นสื่อทั้งหมดเมื่อปิด Modal
+        const mediaContainer = document.getElementById('modal-media-container');
+        mediaContainer.innerHTML = ''; 
         document.getElementById('share-modal').classList.remove('visible');
     }
 
- async function shareMessage(sticker) {
-    // --- ฟังก์ชันตัวช่วย: ตรวจสอบและกรองรหัสสี Hex ---
-    const getValidHexColor = (colorString) => {
-        // ตรวจสอบว่าเป็น string, ขึ้นต้นด้วย # และมีความยาว 7 (เช่น #FFFFFF) หรือ 9 (เช่น #FFFFFFAA)
-        if (typeof colorString === 'string' && colorString.startsWith('#') && (colorString.length === 7 || colorString.length === 9)) {
-            // ถ้าถูกต้อง ให้ return ค่าสีนั้นไปเลย
-            return colorString;
-        }
-        // ถ้าไม่ถูกต้อง ให้ return สีขาวเป็นค่าเริ่มต้นเสมอ
-        return '#FFFFFF';
-    };
+    // [FIXED] ปรับปรุงฟังก์ชัน shareMessage ให้จัดการวิดีโอและรูปภาพอย่างถูกต้อง
+    async function shareMessage(sticker) {
+        // ฟังก์ชันตัวช่วย: ตรวจสอบและกรองรหัสสี Hex
+        const getValidHexColor = (colorString) => {
+            if (typeof colorString === 'string' && colorString.startsWith('#') && (colorString.length === 7 || colorString.length === 9)) {
+                return colorString;
+            }
+            return '#FFFFFF'; // สีขาวเป็นค่าเริ่มต้น
+        };
 
-    const userMessage = document.getElementById('modal-text-input').value.trim();
-    const safeFlexBG = getValidHexColor(sticker.flexBG); // ใช้ฟังก์ชันกรองสี
-    let messagesToSend = [];
+        const userMessage = document.getElementById('modal-text-input').value.trim();
+        const safeFlexBG = getValidHexColor(sticker.flexBG);
+        let messagesToSend = [];
 
-    try {
-        if (sticker.category === 'วิดีโอ') {
-            const videoComponent = {
-                type: "video",
-                url: sticker.imageURL,
-                previewUrl: sticker.previewURL || sticker.imageURL,
-                altContent: {
-                    type: "image", size: "full", aspectRatio: "16:9",
-                    aspectMode: "cover", url: sticker.previewURL || sticker.imageURL
+        try {
+            if (sticker.category === 'วิดีโอ') {
+                // --- จัดการการส่งวิดีโอ ---
+                const previewImageUrl = sticker.previewURL;
+
+                // [FIXED] ตรวจสอบว่ามี previewURL (รูปภาพ) หรือไม่, ถ้าไม่มีจะส่งไม่ได้
+                if (!previewImageUrl) {
+                    alert("ไม่พบภาพตัวอย่างสำหรับวิดีโอ ไม่สามารถแชร์ได้ (ข้อมูล previewURL ขาดหายไป)");
+                    console.error("Video share failed: previewURL is missing for stickerID:", sticker.stickerID);
+                    return; // หยุดการทำงาน
                 }
-            };
-            
-            if (sticker.linkURL) {
-                videoComponent.action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
+
+                const videoComponent = {
+                    type: "video",
+                    url: sticker.imageURL,
+                    previewUrl: previewImageUrl, // [FIXED] ต้องเป็น URL รูปภาพเท่านั้น
+                    altContent: {
+                        type: "image", size: "full", aspectRatio: "16:9",
+                        aspectMode: "cover", url: previewImageUrl
+                    }
+                };
+                
+                if (sticker.linkURL) {
+                    videoComponent.action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
+                }
+
+                const videoFlex = {
+                    type: "flex",
+                    altText: `เพื่อนส่งวิดีโอ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
+                    contents: {
+                        type: "bubble",
+                        body: { type: "box", layout: "vertical", paddingAll: "0px", contents: [videoComponent] }
+                    }
+                };
+                messagesToSend.push(videoFlex);
+
+            } else {
+                // --- จัดการการส่งรูปภาพ ---
+                const heroBlock = {
+                    type: "box",
+                    layout: "vertical",
+                    paddingAll: "0px",
+                    backgroundColor: safeFlexBG,
+                    contents: [
+                        {
+                            type: "image",
+                            url: sticker.imageURL,
+                            size: "full",
+                            aspectMode: "fit"
+                        }
+                    ]
+                };
+
+                if (sticker.linkURL) {
+                    heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
+                }
+
+                const imageFlex = {
+                    type: "flex",
+                    altText: `เพื่อนส่งสติกเกอร์ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
+                    contents: {
+                        type: "bubble",
+                        size: "mega",
+                        hero: heroBlock,
+                        footer: {
+                            type: "box",
+                            layout: "vertical",
+                            spacing: "sm",
+                            paddingAll: "md",
+                            backgroundColor: safeFlexBG,
+                            alignItems: "center",
+                            contents: [
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    maxWidth: "200px",
+                                    contents: [{
+                                        type: "button", style: "secondary", color: "#FFFFFF",
+                                        height: "xs", size: "sm",
+                                        action: {
+                                            type: "uri", label: "ส่งสติกเกอร์ให้เพื่อน",
+                                            uri: `https://liff.line.me/${LIFF_ID}`,
+                                        }
+                                    }]
+                                },
+                                {
+                                    type: "text",
+                                    text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+                                    size: "xxs", color: "#AAAAAA", margin: "md", wrap: true
+                                }
+                            ]
+                        }
+                    }
+                };
+                messagesToSend.push(imageFlex);
             }
 
-            const videoFlex = {
-                type: "flex",
-                altText: `เพื่อนส่งวิดีโอ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
-                contents: {
-                    type: "bubble",
-                    body: { type: "box", layout: "vertical", paddingAll: "0px", contents: [videoComponent] }
-                }
-            };
-            messagesToSend.push(videoFlex);
-
-        } else {
-            const heroBlock = {
-                type: "box",
-                layout: "vertical",
-                paddingAll: "0px",
-                backgroundColor: safeFlexBG, // <-- ใช้สีที่กรองแล้ว
-                contents: [
-                    {
-                        type: "image",
-                        url: sticker.imageURL,
-                        size: "full",
-                        aspectMode: "fit"
-                    }
-                ]
-            };
-
-            if (sticker.linkURL) {
-                heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
+            if (userMessage) {
+                messagesToSend.push({ type: "text", text: userMessage });
             }
 
-            const imageFlex = {
-                type: "flex",
-                altText: `เพื่อนส่งสติกเกอร์ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
-                contents: {
-                    type: "bubble",
-                    size: "mega",
-                    hero: heroBlock,
-                    footer: {
-                        type: "box",
-                        layout: "vertical",
-                        spacing: "sm",
-                        paddingAll: "md",
-                        backgroundColor: safeFlexBG, // <-- ใช้สีที่กรองแล้ว
-                        alignItems: "center",
-                        contents: [
-                            {
-                                type: "box",
-                                layout: "vertical",
-                                maxWidth: "200px",
-                                contents: [{
-                                    type: "button", style: "secondary", color: "#FFFFFF",
-                                    height: "xs", size: "sm",
-                                    action: {
-                                        type: "uri", label: "ส่งสติกเกอร์ให้เพื่อน",
-                                        uri: `https://liff.line.me/${LIFF_ID}`,
-                                    }
-                                }]
-                            },
-                            {
-                                type: "text",
-                                text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-                                size: "xxs", color: "#AAAAAA", margin: "md", wrap: true
-                            }
-                        ]
-                    }
-                }
-            };
-            messagesToSend.push(imageFlex);
-        }
+            if (messagesToSend.length === 0) {
+                // ใช้ alert แทนเพราะเป็นข้อผิดพลาดที่ผู้ใช้ควรรู้
+                alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้");
+                return;
+            }
 
-        if (userMessage) {
-            messagesToSend.push({ type: "text", text: userMessage });
+            const result = await liff.shareTargetPicker(messagesToSend);
+            if (result) {
+                closeModal();
+                await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
+                liff.closeWindow();
+            } else {
+                console.log("Share cancelled by user.");
+            }
+        } catch (error) {
+            console.error("Share Failed:", error);
+            // ใช้ alert แทนเพราะเป็นข้อผิดพลาดที่ผู้ใช้ควรรู้
+            alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
         }
-
-        if (messagesToSend.length === 0) {
-            alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้");
-            return;
-        }
-
-        const result = await liff.shareTargetPicker(messagesToSend);
-        if (result) {
-            closeModal();
-            await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
-            liff.closeWindow();
-        } else {
-            console.log("Share cancelled by user.");
-        }
-    } catch (error) {
-        console.error("Share Failed:", error);
-        alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
     }
-}
 
     async function logAndIncrementStat(stickerID, userID) {
         try {
             await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors',
+                mode: 'no-cors', // Important for sending to GAS from client-side
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ stickerID, userID })
             });
             console.log(`Logged and requested stat increment for ${stickerID}`);
