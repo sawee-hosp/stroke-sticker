@@ -322,43 +322,54 @@
         document.getElementById('share-modal').classList.remove('visible');
     }
 
-    async function shareMessage(sticker) {
-        const userMessage = document.getElementById('modal-text-input').value.trim();
-        let messagesToSend = [];
+ async function shareMessage(sticker) {
+    // --- ฟังก์ชันตัวช่วย: ตรวจสอบและกรองรหัสสี Hex ---
+    const getValidHexColor = (colorString) => {
+        // ตรวจสอบว่าเป็น string, ขึ้นต้นด้วย # และมีความยาว 7 (เช่น #FFFFFF) หรือ 9 (เช่น #FFFFFFAA)
+        if (typeof colorString === 'string' && colorString.startsWith('#') && (colorString.length === 7 || colorString.length === 9)) {
+            // ถ้าถูกต้อง ให้ return ค่าสีนั้นไปเลย
+            return colorString;
+        }
+        // ถ้าไม่ถูกต้อง ให้ return สีขาวเป็นค่าเริ่มต้นเสมอ
+        return '#FFFFFF';
+    };
 
+    const userMessage = document.getElementById('modal-text-input').value.trim();
+    const safeFlexBG = getValidHexColor(sticker.flexBG); // ใช้ฟังก์ชันกรองสี
+    let messagesToSend = [];
+
+    try {
         if (sticker.category === 'วิดีโอ') {
+            const videoComponent = {
+                type: "video",
+                url: sticker.imageURL,
+                previewUrl: sticker.previewURL || sticker.imageURL,
+                altContent: {
+                    type: "image", size: "full", aspectRatio: "16:9",
+                    aspectMode: "cover", url: sticker.previewURL || sticker.imageURL
+                }
+            };
+            
+            if (sticker.linkURL) {
+                videoComponent.action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
+            }
+
             const videoFlex = {
                 type: "flex",
                 altText: `เพื่อนส่งวิดีโอ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
                 contents: {
                     type: "bubble",
-                    body: {
-                        type: "box",
-                        layout: "vertical",
-                        paddingAll: "0px",
-                        contents: [{
-                            type: "video",
-                            url: sticker.imageURL,
-                            previewUrl: sticker.previewURL || sticker.imageURL,
-                            altContent: {
-                                type: "image",
-                                size: "full",
-                                aspectRatio: "16:9",
-                                aspectMode: "cover",
-                                url: sticker.previewURL || sticker.imageURL
-                            },
-                            action: { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL }
-                        }]
-                    }
+                    body: { type: "box", layout: "vertical", paddingAll: "0px", contents: [videoComponent] }
                 }
             };
             messagesToSend.push(videoFlex);
+
         } else {
             const heroBlock = {
                 type: "box",
                 layout: "vertical",
                 paddingAll: "0px",
-                backgroundColor: sticker.flexBG || '#FFFFFF',
+                backgroundColor: safeFlexBG, // <-- ใช้สีที่กรองแล้ว
                 contents: [
                     {
                         type: "image",
@@ -385,7 +396,7 @@
                         layout: "vertical",
                         spacing: "sm",
                         paddingAll: "md",
-                        backgroundColor: sticker.flexBG || '#FFFFFF',
+                        backgroundColor: safeFlexBG, // <-- ใช้สีที่กรองแล้ว
                         alignItems: "center",
                         contents: [
                             {
@@ -393,25 +404,18 @@
                                 layout: "vertical",
                                 maxWidth: "200px",
                                 contents: [{
-                                    type: "button",
-                                    style: "secondary",
-                                    color: "#FFFFFF",
-                                    height: "xs",
+                                    type: "button", style: "secondary", color: "#FFFFFF",
+                                    height: "xs", size: "sm",
                                     action: {
-                                        type: "uri",
-                                        label: "ส่งสติกเกอร์ให้เพื่อน",
+                                        type: "uri", label: "ส่งสติกเกอร์ให้เพื่อน",
                                         uri: `https://liff.line.me/${LIFF_ID}`,
-                                    },
-                                    size: "sm"
+                                    }
                                 }]
                             },
                             {
                                 type: "text",
                                 text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-                                size: "xxs",
-                                color: "#AAAAAA",
-                                margin: "md",
-                                wrap: true
+                                size: "xxs", color: "#AAAAAA", margin: "md", wrap: true
                             }
                         ]
                     }
@@ -424,24 +428,24 @@
             messagesToSend.push({ type: "text", text: userMessage });
         }
 
-        try {
-            if (messagesToSend.length === 0) {
-                alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้");
-                return;
-            }
-            const result = await liff.shareTargetPicker(messagesToSend);
-            if (result) {
-                closeModal();
-                await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
-                liff.closeWindow();
-            } else {
-                console.log("Share cancelled by user.");
-            }
-        } catch (error) {
-            console.error("Share Failed:", error);
-            alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
+        if (messagesToSend.length === 0) {
+            alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้");
+            return;
         }
+
+        const result = await liff.shareTargetPicker(messagesToSend);
+        if (result) {
+            closeModal();
+            await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
+            liff.closeWindow();
+        } else {
+            console.log("Share cancelled by user.");
+        }
+    } catch (error) {
+        console.error("Share Failed:", error);
+        alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
     }
+}
 
     async function logAndIncrementStat(stickerID, userID) {
         try {
