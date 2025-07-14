@@ -332,9 +332,7 @@ async function shareMessage(sticker) {
     const userMessage = document.getElementById('modal-text-input').value.trim();
     let messagesToSend = [];
 
-    // --- Video Flex Message (ไม่มีปัญหานี้) ---
     if (sticker.category === 'วิดีโอ') {
-        // ... โครงสร้าง video flex ไม่ต้องแก้ไข ...
         const videoFlex = {
             type: "flex",
             altText: `เพื่อนส่งวิดีโอ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
@@ -361,69 +359,77 @@ async function shareMessage(sticker) {
             }
         };
         messagesToSend.push(videoFlex);
-    }
-    // --- Image Flex Message (แก้ไขจุดที่ผิด) ---
-    else {
+    } else {
+        // [แก้ไข] สร้าง heroBlock ให้เป็น box เพื่อใส่ backgroundColor ได้
         const heroBlock = {
-            type: "image",
-            url: sticker.imageURL,
-            size: "full",
-            aspectMode: "fit"
+            type: "box",
+            layout: "vertical",
+            paddingAll: "0px",
+            // กำหนดสีพื้นหลังที่นี่ ถ้าไม่มี sticker.flexBG จะเป็นสีขาว
+            backgroundColor: sticker.flexBG || '#FFFFFF',
+            contents: [
+                {
+                    type: "image",
+                    url: sticker.imageURL,
+                    size: "full",
+                    aspectMode: "fit"
+                }
+            ]
         };
+
         if (sticker.linkURL) {
-            heroBlock.action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
+            // ถ้ามีลิงก์ ให้ใส่ action ที่ image component ข้างใน
+            heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
         }
+
         const imageFlex = {
             type: "flex",
             altText: `เพื่อนส่งสติกเกอร์ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
             contents: {
                 type: "bubble",
                 size: "mega",
-                hero: heroBlock,
-footer: {
-    type: "box",
-    layout: "vertical",
-    spacing: "sm",
-    paddingAll: "md",
-    backgroundColor: sticker.flexBG || '#FFFFFF',
-    alignItems: "center",
-    contents: [
-        {
-            type: "box",
-            layout: "vertical",
-            maxWidth: "200px",
-            contents: [
-                {
-                    type: "button",
-                    style: "secondary",
-                    color: "#FFFFFF",
-                    height: "xs",
-                    action: {
-                        type: "uri",
-                        label: "ส่งสติกเกอร์ให้เพื่อน",
-                        uri: `https://liff.line.me/${LIFF_ID}`,
-                    },
-                    size: "sm"
+                hero: heroBlock, // ใช้ heroBlock ที่สร้างขึ้นใหม่
+                footer: {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    paddingAll: "md",
+                    backgroundColor: sticker.flexBG || '#FFFFFF',
+                    alignItems: "center",
+                    contents: [
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            maxWidth: "200px",
+                            contents: [{
+                                type: "button",
+                                style: "secondary",
+                                color: "#FFFFFF",
+                                height: "xs",
+                                action: {
+                                    type: "uri",
+                                    label: "ส่งสติกเกอร์ให้เพื่อน",
+                                    uri: `https://liff.line.me/${LIFF_ID}`,
+                                },
+                                size: "sm"
+                            }]
+                        },
+                        {
+                            type: "text",
+                            text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+                            size: "xxs",
+                            color: "#AAAAAA",
+                            margin: "md",
+                            wrap: true
+                            // [แก้ไข] นำ align: "center" ออกจากตรงนี้แล้ว
+                        }
+                    ]
                 }
-            ]
-        },
-        {
-            type: "text",
-            text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-            size: "xxs",
-            color: "#AAAAAA",
-            margin: "md",
-            wrap: true,
-            align: "center"
-        }
-    ]
-}
             }
         };
         messagesToSend.push(imageFlex);
     }
 
-    // เพิ่มข้อความที่ผู้ใช้พิมพ์ (ถ้ามี)
     if (userMessage) {
         messagesToSend.push({ type: "text", text: userMessage });
     }
@@ -446,7 +452,6 @@ footer: {
         alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
     }
 }
-
     async function logAndIncrementStat(stickerID, userID) {
         try {
             await fetch(GAS_WEB_APP_URL, {
