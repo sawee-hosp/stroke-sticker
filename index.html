@@ -423,15 +423,49 @@
                     heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
                 }
 
-                // [FIXED] แก้ไข imageFlex โดยการเอาส่วน footer ที่ซับซ้อนออก
                 const imageFlex = {
                     type: "flex",
                     altText: `เพื่อนส่งสติกเกอร์ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
                     contents: {
                         type: "bubble",
                         size: "mega",
-                        hero: heroBlock
-                        // --- ไม่มี footer ---
+                        hero: heroBlock,
+                        footer: {
+                            type: "box",
+                            layout: "vertical",
+                            spacing: "sm",
+                            paddingAll: "md",
+                            backgroundColor: safeFlexBG,
+                            alignItems: "center",
+                            contents: [
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    maxWidth: "70%", // จำกัดความกว้างของปุ่มไว้ที่ 70%
+                                    contents: [
+                                        {
+                                            type: "button",
+                                            style: "secondary",
+                                            color: "#FFFFFF",
+                                            height: "xs",
+                                            action: {
+                                                type: "uri",
+                                                label: "ส่งให้เพื่อน", // ทำให้ข้อความสั้นลง
+                                                uri: `https://liff.line.me/${LIFF_ID}`
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: "text",
+                                    text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+                                    size: "xxs",
+                                    color: "#AAAAAA",
+                                    margin: "md",
+                                    wrap: true
+                                }
+                            ]
+                        }
                     }
                 };
                 messagesToSend.push(imageFlex);
