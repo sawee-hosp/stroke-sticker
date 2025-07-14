@@ -462,4 +462,23 @@
 
     async function logAndIncrementStat(stickerID, userID) {
         try {
-            await fe
+            await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ stickerID, userID })
+            });
+            console.log(`Logged and requested stat increment for ${stickerID}`);
+        } catch (error) {
+            console.error("Log/Increment request failed:", error);
+        }
+    }
+
+    // --- APP ENTRY POINT ---
+    main();
+
+</script>
+</body>
+</html>
