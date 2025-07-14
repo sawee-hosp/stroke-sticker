@@ -199,7 +199,6 @@
     <div class="modal-overlay" id="share-modal">
         <button class="close-modal" onclick="closeModal()">&times;</button>
         <div class="modal-content">
-            <!-- [FIXED] เปลี่ยนจาก img เป็น div container สำหรับรองรับทั้งภาพและวิดีโอ -->
             <div id="modal-media-container"></div>
             <textarea id="modal-text-input"></textarea>
             <button id="modal-share-button" class="modal-button">ส่งให้เพื่อน</button>
@@ -295,7 +294,6 @@
         container.className = isDaily ? 'daily-sticker-card' : 'sticker-item';
         
         const img = document.createElement('img');
-        // ใช้ previewURL ถ้ามี, ถ้าไม่มีใช้ imageURL
         img.src = sticker.previewURL || sticker.imageURL;
         img.alt = sticker.text.substring(0, 30);
         img.loading = 'lazy';
@@ -328,26 +326,22 @@
     }
 
     // --- MODAL & SHARING ---
-    
-    // [FIXED] ปรับปรุงฟังก์ชัน openModal ให้รองรับทั้งภาพและวิดีโอ
     function openModal(sticker) {
         const mediaContainer = document.getElementById('modal-media-container');
-        mediaContainer.innerHTML = ''; // เคลียร์ของเก่าออกก่อน
+        mediaContainer.innerHTML = ''; 
 
         if (sticker.category === 'วิดีโอ' && sticker.imageURL) {
-            // --- สร้าง element <video> ---
             const video = document.createElement('video');
-            video.src = sticker.imageURL; // URL ของไฟล์วิดีโอ
-            video.controls = true;    // แสดงปุ่มควบคุม
-            video.autoplay = true;    // เล่นอัตโนมัติ
-            video.muted = true;       // ปิดเสียง (จำเป็นสำหรับ autoplay)
-            video.loop = true;        // เล่นวน
-            video.playsInline = true; // สำหรับมือถือ ให้เล่นในหน้าเว็บ
+            video.src = sticker.imageURL;
+            video.controls = true;
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
             mediaContainer.appendChild(video);
         } else {
-            // --- สร้าง element <img> สำหรับรูปภาพ ---
             const img = document.createElement('img');
-            img.src = sticker.imageURL; // ใช้ imageURL เพื่อความคมชัด
+            img.src = sticker.imageURL;
             mediaContainer.appendChild(img);
         }
 
@@ -357,20 +351,17 @@
     }
 
     function closeModal() {
-        // หยุดการเล่นสื่อทั้งหมดเมื่อปิด Modal
         const mediaContainer = document.getElementById('modal-media-container');
         mediaContainer.innerHTML = ''; 
         document.getElementById('share-modal').classList.remove('visible');
     }
 
-    // [FIXED] ปรับปรุงฟังก์ชัน shareMessage ให้จัดการวิดีโอและรูปภาพอย่างถูกต้อง
     async function shareMessage(sticker) {
-        // ฟังก์ชันตัวช่วย: ตรวจสอบและกรองรหัสสี Hex
         const getValidHexColor = (colorString) => {
             if (typeof colorString === 'string' && colorString.startsWith('#') && (colorString.length === 7 || colorString.length === 9)) {
                 return colorString;
             }
-            return '#FFFFFF'; // สีขาวเป็นค่าเริ่มต้น
+            return '#FFFFFF';
         };
 
         const userMessage = document.getElementById('modal-text-input').value.trim();
@@ -379,20 +370,18 @@
 
         try {
             if (sticker.category === 'วิดีโอ') {
-                // --- จัดการการส่งวิดีโอ ---
                 const previewImageUrl = sticker.previewURL;
 
-                // [FIXED] ตรวจสอบว่ามี previewURL (รูปภาพ) หรือไม่, ถ้าไม่มีจะส่งไม่ได้
                 if (!previewImageUrl) {
                     alert("ไม่พบภาพตัวอย่างสำหรับวิดีโอ ไม่สามารถแชร์ได้ (ข้อมูล previewURL ขาดหายไป)");
                     console.error("Video share failed: previewURL is missing for stickerID:", sticker.stickerID);
-                    return; // หยุดการทำงาน
+                    return;
                 }
 
                 const videoComponent = {
                     type: "video",
                     url: sticker.imageURL,
-                    previewUrl: previewImageUrl, // [FIXED] ต้องเป็น URL รูปภาพเท่านั้น
+                    previewUrl: previewImageUrl,
                     altContent: {
                         type: "image", size: "full", aspectRatio: "16:9",
                         aspectMode: "cover", url: previewImageUrl
@@ -434,41 +423,15 @@
                     heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
                 }
 
+                // [FIXED] แก้ไข imageFlex โดยการเอาส่วน footer ที่ซับซ้อนออก
                 const imageFlex = {
                     type: "flex",
                     altText: `เพื่อนส่งสติกเกอร์ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
                     contents: {
                         type: "bubble",
                         size: "mega",
-                        hero: heroBlock,
-                        footer: {
-                            type: "box",
-                            layout: "vertical",
-                            spacing: "sm",
-                            paddingAll: "md",
-                            backgroundColor: safeFlexBG,
-                            alignItems: "center",
-                            contents: [
-                                {
-                                    type: "box",
-                                    layout: "vertical",
-                                    maxWidth: "200px",
-                                    contents: [{
-                                        type: "button", style: "secondary", color: "#FFFFFF",
-                                        height: "xs", size: "sm",
-                                        action: {
-                                            type: "uri", label: "ส่งสติกเกอร์ให้เพื่อน",
-                                            uri: `https://liff.line.me/${LIFF_ID}`,
-                                        }
-                                    }]
-                                },
-                                {
-                                    type: "text",
-                                    text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-                                    size: "xxs", color: "#AAAAAA", margin: "md", wrap: true
-                                }
-                            ]
-                        }
+                        hero: heroBlock
+                        // --- ไม่มี footer ---
                     }
                 };
                 messagesToSend.push(imageFlex);
@@ -479,7 +442,6 @@
             }
 
             if (messagesToSend.length === 0) {
-                // ใช้ alert แทนเพราะเป็นข้อผิดพลาดที่ผู้ใช้ควรรู้
                 alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้");
                 return;
             }
@@ -494,30 +456,10 @@
             }
         } catch (error) {
             console.error("Share Failed:", error);
-            // ใช้ alert แทนเพราะเป็นข้อผิดพลาดที่ผู้ใช้ควรรู้
             alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
         }
     }
 
     async function logAndIncrementStat(stickerID, userID) {
         try {
-            await fetch(GAS_WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Important for sending to GAS from client-side
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ stickerID, userID })
-            });
-            console.log(`Logged and requested stat increment for ${stickerID}`);
-        } catch (error) {
-            console.error("Log/Increment request failed:", error);
-        }
-    }
-
-    // --- APP ENTRY POINT ---
-    main();
-
-</script>
-</body>
-</html>
+            await fe
