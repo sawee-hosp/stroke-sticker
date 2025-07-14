@@ -328,113 +328,125 @@
         document.getElementById('share-modal').classList.remove('visible');
     }
 
-    async function shareMessage(sticker) {
-        const userMessage = document.getElementById('modal-text-input').value;
-        let messagesToSend = [];
+ async function shareMessage(sticker) {
+    const userMessage = document.getElementById('modal-text-input').value;
+    let messagesToSend = [];
 
-        // --- Video Flex Message ---
-        if (sticker.category === 'วิดีโอ') {
-            const videoFlex = {
-                type: "flex",
-                altText: "เพื่อนส่งวิดีโอห่วงใยมาให้คุณ",
-                contents: {
-                    type: "bubble",
-                    body: {
-                        type: "box",
-                        layout: "vertical",
-                        paddingAll: "0px",
-                        contents: [
-                            {
-                                type: "video",
-                                url: sticker.imageURL, // Using imageURL for video as requested
-                                previewUrl: sticker.previewURL || sticker.imageURL, // Use a preview if available
-                                altContent: {
-                                    type: "image",
-                                    size: "full",
-                                    aspectRatio: "16:9",
-                                    aspectMode: "cover",
-                                    url: sticker.previewURL || sticker.imageURL
-                                },
-                                action: { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL }
-                            }
-                        ]
-                    }
+    // --- Video Flex Message (โครงสร้างถูกต้องแล้ว) ---
+    if (sticker.category === 'วิดีโอ') {
+        const videoFlex = {
+            type: "flex",
+            altText: `เพื่อนส่งวิดีโอ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
+            contents: {
+                type: "bubble",
+                body: {
+                    type: "box",
+                    layout: "vertical",
+                    paddingAll: "0px",
+                    contents: [{
+                        type: "video",
+                        url: sticker.imageURL,
+                        previewUrl: sticker.previewURL || sticker.imageURL,
+                        altContent: {
+                            type: "image",
+                            size: "full",
+                            aspectRatio: "16:9",
+                            aspectMode: "cover",
+                            url: sticker.previewURL || sticker.imageURL
+                        },
+                        action: {
+                            type: "uri",
+                            label: "ดูเพิ่มเติม",
+                            uri: sticker.linkURL
+                        }
+                    }]
                 }
-            };
-            messagesToSend.push(videoFlex);
-        } 
-        // --- Image Flex Message ---
-        else {
-            // Conditionally build the hero block
-            const heroBlock = {
-                type: "image",
-                url: sticker.imageURL,
-                size: "full",
-                aspectMode: "fit" // Use 'fit' to ensure the image is not cropped
-                // REMOVED: aspectRatio to prevent validation errors
-            };
-            // Only add action if linkURL exists and is not empty
-            if (sticker.linkURL) {
-                heroBlock.action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
             }
-
-            const imageFlex = {
-                type: "flex",
-                altText: "เพื่อนส่งสติกเกอร์ห่วงใยมาให้คุณ",
-                contents: {
-                    type: "bubble",
-                    size: "giga",
-                    hero: heroBlock, // Use the dynamically created hero block
-                    footer: {
-                        type: "box",
-                        layout: "vertical",
-                        spacing: "none",
-                        margin: "none",
-                        backgroundColor: sticker.flexBG || '#FFFFFF',
-                        contents: [
-                            {
-                                type: "button",
-                                style: "secondary",
-                                height: "xs",
-                                action: {
-                                    type: "uri",
-                                    label: "แชร์สติกเกอร์นี้ให้เพื่อน",
-                                    uri: `https://liff.line.me/${LIFF_ID}`
-                                }
-                            },
-                            {
-                                type: "text",
-                                text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-                                size: "xxxxs",
-                                color: "#AAAAAA",
-                                align: "center",
-                                margin: "sm"
-                            }
-                        ]
-                    }
-                }
-            };
-            messagesToSend.push(imageFlex);
-        }
-        
-        // Add the plain text message
-        const textMessage = { type: "text", text: userMessage };
-        messagesToSend.push(textMessage);
-
-        try {
-            const result = await liff.shareTargetPicker(messagesToSend);
-            if (result) {
-                closeModal();
-                await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
-                liff.closeWindow();
-            } else {
-                console.log("Share cancelled by user.");
-            }
-        } catch (error) {
-            console.error("Share Failed:", error);
-            alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
-        }
+        };
+        messagesToSend.push(videoFlex);
     }
+    // --- Image Flex Message (แก้ไขแล้ว) ---
+    else {
+        // สร้าง hero block แบบมีเงื่อนไข
+        const heroBlock = {
+            type: "image",
+            url: sticker.imageURL,
+            size: "full",
+            aspectMode: "fit" // 'fit' จะแสดงรูปเต็ม ไม่ตัดส่วนใดส่วนหนึ่ง
+            // ไม่จำเป็นต้องมี aspectRatio ในขนาด mega
+        };
+
+        // เพิ่ม action (ปุ่มกดบนรูป) ต่อเมื่อมี linkURL เท่านั้น
+        if (sticker.linkURL) {
+            heroBlock.action = {
+                type: "uri",
+                label: "ดูเพิ่มเติม",
+                uri: sticker.linkURL
+            };
+        }
+
+        const imageFlex = {
+            type: "flex",
+            altText: `เพื่อนส่งสติกเกอร์ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
+            contents: {
+                type: "bubble",
+                // [แก้ไข] เปลี่ยนจาก 'giga' เป็น 'mega' เพื่อหลีกเลี่ยงข้อบังคับ aspectRatio ของ hero
+                size: "mega",
+                hero: heroBlock,
+                footer: {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm", // เพิ่มระยะห่างเล็กน้อยเพื่อความสวยงาม
+                    paddingAll: "md", // เพิ่ม padding ให้ขอบไม่ชิดเกินไป
+                    backgroundColor: sticker.flexBG || '#FFFFFF',
+                    contents: [{
+                        type: "button",
+                        style: "primary", // เปลี่ยนเป็น primary ให้เด่นขึ้น
+                        color: "#007BFF", // กำหนดสีให้ตรงกับธีมหลัก
+                        height: "sm",
+                        action: {
+                            type: "uri",
+                            label: "สร้างและแชร์สติกเกอร์นี้",
+                            uri: `https://liff.line.me/${LIFF_ID}`
+                        }
+                    }, {
+                        type: "text",
+                        text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+                        size: "xxs", // ปรับขนาดให้เล็กลงเล็กน้อย
+                        color: "#AAAAAA",
+                        align: "center",
+                        margin: "md" // เพิ่มระยะห่างด้านบน
+                    }]
+                }
+            }
+        };
+        messagesToSend.push(imageFlex);
+    }
+
+    // เพิ่มข้อความธรรมดาที่ผู้ใช้พิมพ์ต่อท้ายเสมอ
+    if (userMessage.trim() !== '') {
+        const textMessage = {
+            type: "text",
+            text: userMessage
+        };
+        messagesToSend.push(textMessage);
+    }
+
+
+    try {
+        const result = await liff.shareTargetPicker(messagesToSend);
+        if (result) {
+            closeModal();
+            await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
+            liff.closeWindow();
+        } else {
+            console.log("Share cancelled by user.");
+        }
+    } catch (error) {
+        console.error("Share Failed:", error);
+        alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
+    }
+}
 
     async function logAndIncrementStat(stickerID, userID) {
         try {
