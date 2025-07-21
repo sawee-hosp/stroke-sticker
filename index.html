@@ -15,8 +15,8 @@
             --text-color: #333;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             --border-radius: 12px;
-            --badge-popular-bg: #dc2626; /* red */
-            --badge-new-bg: #2563eb; /* blue */
+            --badge-popular-bg: #dc2626;
+            --badge-new-bg: #2563eb;
         }
         body { font-family: "Noto Sans Thai", sans-serif; background-color: var(--background-color); margin: 0; padding: 16px; }
         .main-container { max-width: 600px; margin: 0 auto; }
@@ -40,9 +40,10 @@
         #loader { text-align: center; padding: 50px; }
         .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; z-index: 1000; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; z-index: 1000; }
         .modal-overlay.visible { opacity: 1; visibility: visible; }
-        .modal-content { background-color: white; padding: 24px; border-radius: var(--border-radius); width: 90%; max-width: 400px; text-align: center; }
+        .modal-content { position: relative; background-color: white; padding: 24px; border-radius: var(--border-radius); width: 90%; max-width: 400px; text-align: center; }
+        .close-modal { position: absolute; top: -10px; right: -10px; background: #333; color: white; border-radius: 50%; border: 2px solid white; width: 32px; height: 32px; font-size: 1.5em; line-height: 28px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         #modal-media-container { margin-bottom: 16px; }
         #modal-media-container img, #modal-media-container video { width: 100%; max-width: 280px; max-height: 280px; border-radius: 8px; object-fit: contain; }
         .modal-content textarea { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; border: 1px solid #ccc; min-height: 100px; margin-bottom: 8px; font-family: "Noto Sans Thai", sans-serif; font-size: 1.1em; }
@@ -52,25 +53,20 @@
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <p>กำลังโหลดข้อมูล...</p>
-    </div>
+    <div id="loader"><div class="spinner"></div><p>กำลังโหลดข้อมูล...</p></div>
 
     <div class="main-container" id="app-content" style="display: none;">
         <h2 class="section-title">สติกเกอร์ประจำวันนี้</h2>
         <div id="daily-sticker-container"></div>
-
         <h2 class="section-title" style="margin-top: 32px;">คลังสติกเกอร์</h2>
-        <div class="filter-container">
-            <div id="category-filter-container"></div>
-        </div>
+        <div class="filter-container"><div id="category-filter-container"></div></div>
         <div class="sticker-library-grid" id="sticker-library-container"></div>
         <button id="load-more-btn" style="display: none;">แสดงเพิ่ม</button>
     </div>
 
     <div class="modal-overlay" id="share-modal">
         <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
             <div id="modal-media-container"></div>
             <textarea id="modal-text-input"></textarea>
             <p class="modal-helper-text">สามารถแก้ไขข้อความที่จะส่งได้</p>
@@ -81,15 +77,11 @@
 <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
 <script>
     // --- CONFIGURATION ---
-    const LIFF_ID = "2005789397-37lemBgX"; // Please verify this ID
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec"; // Please verify this URL
+    const LIFF_ID = "2005789397-37lemBgX"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec";
 
     // --- GLOBAL VARIABLES ---
-    let allStickers = [];
-    let popularStickerIDs = [];
-    let newStickerIDs = [];
-    let currentUserProfile = {};
-    let currentFilteredStickers = [];
+    let allStickers = [], popularStickerIDs = [], newStickerIDs = [], currentUserProfile = {}, currentFilteredStickers = [];
     const ITEMS_PER_PAGE = 15;
 
     // --- INITIALIZATION ---
@@ -97,15 +89,10 @@
         try {
             document.getElementById('loader').style.display = 'block';
             await liff.init({ liffId: LIFF_ID });
-            if (!liff.isLoggedIn()) {
-                liff.login();
-                return;
-            }
+            if (!liff.isLoggedIn()) { liff.login(); return; }
             currentUserProfile = await liff.getProfile();
             await fetchStickers();
-        } catch (error) {
-            handleError("Initialization Failed", error);
-        }
+        } catch (error) { handleError("Initialization Failed", error); }
     }
 
     async function fetchStickers() {
@@ -124,12 +111,8 @@
                 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (error) {
-            handleError("Fetch Stickers Failed", error);
-        }
+            } else { throw new Error(result.message); }
+        } catch (error) { handleError("Fetch Stickers Failed", error); }
     }
 
     // --- UI RENDERING ---
@@ -137,11 +120,9 @@
         const filterContainer = document.getElementById('category-filter-container');
         const categories = new Set();
         allStickers.forEach(s => s.category.split(',').forEach(cat => categories.add(cat.trim())));
-        
         const sortedCategories = Array.from(categories).sort((a,b) => a.localeCompare(b));
         const todayThai = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
         const defaultCategories = ['คำแนะนำ', todayThai, 'สิ่งศักดิ์สิทธิ์'];
-
         filterContainer.innerHTML = '';
         sortedCategories.forEach(cat => {
             const isChecked = defaultCategories.includes(cat);
@@ -150,7 +131,6 @@
             wrapper.innerHTML = `<input type="checkbox" class="cat-checkbox" id="cat-${cat}" value="${cat}" ${isChecked ? 'checked' : ''}><label for="cat-${cat}">${cat}</label>`;
             filterContainer.appendChild(wrapper);
         });
-
         filterContainer.addEventListener('change', renderUI);
     }
 
@@ -164,34 +144,22 @@
         dailyContainer.innerHTML = '';
         const todayThai = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
         const dailyStickers = allStickers.filter(s => s.category.includes(todayThai));
-
         if (dailyStickers.length > 0) {
             const randomSticker = dailyStickers[Math.floor(Math.random() * dailyStickers.length)];
             dailyContainer.appendChild(createStickerElement(randomSticker, { isDaily: true }));
-        } else {
-            dailyContainer.innerHTML = '<p>ไม่มีสติกเกอร์สำหรับวันนี้</p>';
-        }
+        } else { dailyContainer.innerHTML = '<p>ไม่มีสติกเกอร์สำหรับวันนี้</p>'; }
     }
 
     function renderStickerLibrary() {
         const selectedCategories = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
-        
-        const filtered = selectedCategories.length > 0 ?
-            allStickers.filter(s => s.category.split(',').map(c => c.trim()).some(sc => selectedCategories.includes(sc))) : [];
-
+        const filtered = selectedCategories.length > 0 ? allStickers.filter(s => s.category.split(',').map(c => c.trim()).some(sc => selectedCategories.includes(sc))) : [];
         const popularInFilter = filtered.filter(s => popularStickerIDs.includes(s.stickerID));
         const popularIdsInFilter = popularInFilter.map(s => s.stickerID);
         const regularStickers = filtered.filter(s => !popularIdsInFilter.includes(s.stickerID));
-        
         currentFilteredStickers = [...popularInFilter, ...shuffleArray(regularStickers)];
-        
         const libraryContainer = document.getElementById('sticker-library-container');
         libraryContainer.innerHTML = '';
-        
-        currentFilteredStickers.slice(0, ITEMS_PER_PAGE).forEach(sticker => {
-            libraryContainer.appendChild(createStickerElement(sticker));
-        });
-
+        currentFilteredStickers.slice(0, ITEMS_PER_PAGE).forEach(sticker => { libraryContainer.appendChild(createStickerElement(sticker)); });
         const loadMoreBtn = document.getElementById('load-more-btn');
         loadMoreBtn.style.display = currentFilteredStickers.length > ITEMS_PER_PAGE ? 'block' : 'none';
         loadMoreBtn.onclick = loadMoreStickers;
@@ -201,20 +169,15 @@
         const { isDaily = false } = options;
         const container = document.createElement('div');
         container.className = isDaily ? 'daily-sticker-card' : 'sticker-item';
-        
         const img = document.createElement('img');
         img.src = sticker.previewURL || sticker.imageURL;
         img.alt = sticker.text ? sticker.text.substring(0, 30) : 'Sticker';
         img.loading = 'lazy';
         container.appendChild(img);
-
         if (!isDaily) {
             let badgeText = '', badgeClass = '';
-            if (popularStickerIDs.includes(sticker.stickerID)) {
-                badgeText = 'ยอดนิยม'; badgeClass = 'badge-popular';
-            } else if (newStickerIDs.includes(sticker.stickerID)) {
-                badgeText = 'มาใหม่'; badgeClass = 'badge-new';
-            }
+            if (popularStickerIDs.includes(sticker.stickerID)) { badgeText = 'ยอดนิยม'; badgeClass = 'badge-popular'; } 
+            else if (newStickerIDs.includes(sticker.stickerID)) { badgeText = 'มาใหม่'; badgeClass = 'badge-new'; }
             if (badgeText) {
                 const badge = document.createElement('div');
                 badge.className = `sticker-badge ${badgeClass}`;
@@ -228,9 +191,7 @@
 
     function loadMoreStickers() {
         const libraryContainer = document.getElementById('sticker-library-container');
-        currentFilteredStickers.slice(ITEMS_PER_PAGE).forEach(sticker => {
-            libraryContainer.appendChild(createStickerElement(sticker));
-        });
+        currentFilteredStickers.slice(ITEMS_PER_PAGE).forEach(sticker => { libraryContainer.appendChild(createStickerElement(sticker)); });
         document.getElementById('load-more-btn').style.display = 'none';
     }
 
@@ -239,7 +200,6 @@
         const modal = document.getElementById('share-modal');
         const mediaContainer = document.getElementById('modal-media-container');
         mediaContainer.innerHTML = ''; 
-
         if (sticker.category.includes('วิดีโอ') && sticker.imageURL) {
             const video = document.createElement('video');
             video.src = sticker.imageURL;
@@ -250,23 +210,67 @@
             img.src = sticker.imageURL;
             mediaContainer.appendChild(img);
         }
-
         document.getElementById('modal-text-input').value = sticker.text;
         document.getElementById('modal-share-button').onclick = () => shareMessage(sticker);
+        modal.onclick = (e) => { if (e.target === modal) closeModal(); };
         modal.classList.add('visible');
     }
 
     function closeModal() {
-        document.getElementById('share-modal').classList.remove('visible');
+        const modal = document.getElementById('share-modal');
+        modal.classList.remove('visible');
+        const mediaContainer = document.getElementById('modal-media-container');
+        mediaContainer.innerHTML = '';
     }
     
-    // --- REFACTORED AND FIXED FLEX MESSAGE LOGIC ---
+    // --- FLEX MESSAGE LOGIC ---
+
+    // ***** THIS FUNCTION HAS BEEN MODIFIED *****
     function createFlexFooter(bgColor = '#FFFFFF') {
         return {
-            type: "box", layout: "vertical", spacing: "sm", paddingAll: "md", backgroundColor: bgColor, alignItems: "center",
+            type: "box",
+            layout: "vertical",
+            spacing: "sm",
+            paddingAll: "md",
+            backgroundColor: bgColor,
+            alignItems: "center",
+            // Add the action to the entire footer box
+            action: {
+                type: "uri",
+                label: "เปิด LINE Official", // This label is required but not visible
+                uri: "https://lin.ee/MjUwBob"
+            },
             contents: [
-                { type: "box", layout: "vertical", maxWidth: "70%", backgroundColor: "#FFFFFF", cornerRadius: "md", paddingAll: "sm", action: { type: "uri", label: "ส่งให้เพื่อน", uri: `https://liff.line.me/${LIFF_ID}` }, contents: [{ type: "text", text: "ส่งให้เพื่อน", color: "#111111", size: "sm", align: "center" }] },
-                { type: "text", text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร", size: "xxs", color: "#AAAAAA", margin: "md", wrap: true }
+                // The button's action will override the parent's action, so it still works
+                {
+                    type: "box",
+                    layout: "vertical",
+                    maxWidth: "70%",
+                    backgroundColor: "#FFFFFF",
+                    cornerRadius: "md",
+                    paddingAll: "sm",
+                    action: {
+                        type: "uri",
+                        label: "ส่งให้เพื่อน",
+                        uri: `https://liff.line.me/${LIFF_ID}`
+                    },
+                    contents: [{
+                        type: "text",
+                        text: "ส่งให้เพื่อน",
+                        color: "#111111",
+                        size: "sm",
+                        align: "center"
+                    }]
+                },
+                // The credit text will now be clickable and link to the LINE OA
+                {
+                    type: "text",
+                    text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
+                    size: "xxs",
+                    color: "#AAAAAA",
+                    margin: "md",
+                    wrap: true
+                }
             ]
         };
     }
@@ -274,38 +278,25 @@
     function createImageFlex(sticker) {
         const safeFlexBG = (sticker.flexBG && sticker.flexBG.startsWith('#')) ? sticker.flexBG : '#FFFFFF';
         const heroBlock = { type: "box", layout: "vertical", paddingAll: "0px", backgroundColor: safeFlexBG, contents: [{ type: "image", url: sticker.imageURL, size: "full", aspectMode: "fit" }] };
-        if (sticker.linkURL) {
-            heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
-        }
+        if (sticker.linkURL) { heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL }; }
         return { type: "flex", altText: `เพื่อนส่งสติกเกอร์ให้คุณ`, contents: { type: "bubble", size: "mega", hero: heroBlock, footer: createFlexFooter(safeFlexBG) }};
     }
 
     function createVideoFlex(sticker) {
         if (!sticker.imageURL || !sticker.previewURL) return null;
-        return { type: "flex", altText: "เพื่อนส่งวิดีโอให้คุณ", contents: { type: "bubble", size: "mega", body: { type: "box", layout: "vertical", paddingAll: "0px", contents: [{ type: "video", url: sticker.imageURL, previewUrl: sticker.previewURL, aspectRatio: "16:9" }] }, footer: createFlexFooter() }};
+        const videoComponent = { type: "video", url: sticker.imageURL, previewUrl: sticker.previewURL, aspectRatio: "16:9", action: { type: "uri", label: "ดูวิดีโอ", uri: sticker.imageURL }, altContent: { type: 'box', layout: 'vertical', justifyContent: 'center', alignItems: 'center', contents: [{ type: 'text', text: 'ไม่สามารถเล่นวิดีโอได้', color: '#ffffff' }] } };
+        return { type: "flex", altText: "เพื่อนส่งวิดีโอให้คุณ", contents: { type: "bubble", size: "mega", body: { type: "box", layout: "vertical", paddingAll: "0px", contents: [videoComponent] }, footer: createFlexFooter() }};
     }
 
     async function shareMessage(sticker) {
         const userMessage = document.getElementById('modal-text-input').value.trim();
         let messagesToSend = [];
         let flexMessage;
-
-        if (sticker.category.includes('วิดีโอ')) {
-            flexMessage = createVideoFlex(sticker);
-        } else {
-            flexMessage = createImageFlex(sticker);
-        }
-
-        if (!flexMessage) {
-            alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้ ข้อมูลอาจไม่สมบูรณ์");
-            return;
-        }
+        if (sticker.category.includes('วิดีโอ')) { flexMessage = createVideoFlex(sticker); } 
+        else { flexMessage = createImageFlex(sticker); }
+        if (!flexMessage) { alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้ ข้อมูลอาจไม่สมบูรณ์"); return; }
         messagesToSend.push(flexMessage);
-
-        if (userMessage) {
-            messagesToSend.push({ type: "text", text: userMessage });
-        }
-
+        if (userMessage) { messagesToSend.push({ type: "text", text: userMessage }); }
         try {
             const result = await liff.shareTargetPicker(messagesToSend);
             if (result) {
@@ -313,38 +304,18 @@
                 await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
                 liff.closeWindow();
             }
-        } catch (error) {
-            handleError("Share Failed", error);
-        }
+        } catch (error) { handleError("Share Failed", error); }
     }
 
     async function logAndIncrementStat(stickerID, userID) {
         try {
-            await fetch(GAS_WEB_APP_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ stickerID, userID }),
-                mode: 'no-cors' // Use no-cors for fire-and-forget logging
-            });
-        } catch (error) {
-            console.error("Log/Increment request failed:", error);
-        }
+            await fetch(GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stickerID, userID }), mode: 'no-cors' });
+        } catch (error) { console.error("Log/Increment request failed:", error); }
     }
     
     // --- UTILITIES ---
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    function handleError(context, error) {
-        console.error(`${context}:`, error);
-        const loader = document.getElementById('loader');
-        if(loader) loader.innerHTML = `<p>เกิดข้อผิดพลาด: ${error.message}<br>กรุณาลองใหม่อีกครั้ง</p>`;
-    }
+    function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
+    function handleError(context, error) { console.error(`${context}:`, error); const loader = document.getElementById('loader'); if(loader) loader.innerHTML = `<p>เกิดข้อผิดพลาด: ${error.message}<br>กรุณาลองใหม่อีกครั้ง</p>`; }
 
     // --- START APP ---
     main();
