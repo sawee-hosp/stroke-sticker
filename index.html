@@ -18,85 +18,28 @@
             --badge-popular-bg: #dc2626; /* red */
             --badge-new-bg: #2563eb; /* blue */
         }
-        body {
-            font-family: "Noto Sans Thai", sans-serif;
-            background-color: var(--background-color);
-            margin: 0;
-            padding: 16px;
-        }
+        body { font-family: "Noto Sans Thai", sans-serif; background-color: var(--background-color); margin: 0; padding: 16px; }
         .main-container { max-width: 600px; margin: 0 auto; }
-        .section-title {
-            font-size: 1.5em;
-            font-weight: 700;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--primary-color);
-        }
-
-        /* --- Daily Sticker --- */
-        .daily-sticker-card {
-            background-color: var(--card-bg-color);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 16px;
-            margin-bottom: 24px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
+        .section-title { font-size: 1.5em; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary-color); }
+        .daily-sticker-card { background-color: var(--card-bg-color); border-radius: var(--border-radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 24px; cursor: pointer; transition: transform 0.2s ease; }
         .daily-sticker-card:hover { transform: translateY(-5px); }
         .daily-sticker-card img { width: 100%; border-radius: 8px; }
-
-        /* --- Filter Checkbox --- */
         .filter-container { margin-bottom: 20px; }
-        #category-filter-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-        }
+        #category-filter-container { display: flex; flex-wrap: wrap; gap: 10px; }
         .checkbox-wrapper { display: inline-flex; align-items: center; }
         .checkbox-wrapper input[type="checkbox"] { margin-right: 6px; width: 18px; height: 18px; cursor: pointer; }
         .checkbox-wrapper label { font-size: 0.95em; cursor: pointer; user-select: none; }
-        #select-all-wrapper { font-weight: bold; }
-        
-        /* --- Sticker Grid & Badges --- */
-        .sticker-library-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 16px;
-        }
+        .sticker-library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px; }
         .sticker-item { position: relative; cursor: pointer; transition: transform 0.2s ease; }
         .sticker-item:hover { transform: scale(1.05); }
-        .sticker-item img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .sticker-badge {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            color: white;
-            font-size: 0.7em;
-            font-weight: bold;
-            padding: 3px 8px;
-            border-radius: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
+        .sticker-item img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .sticker-badge { position: absolute; top: 5px; left: 5px; color: white; font-size: 0.7em; font-weight: bold; padding: 3px 8px; border-radius: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
         .badge-popular { background-color: var(--badge-popular-bg); }
         .badge-new { background-color: var(--badge-new-bg); }
-
-        /* --- Load more & Loader --- */
         #load-more-btn { display: block; width: 100%; padding: 12px; margin-top: 24px; font-family: "Noto Sans Thai", sans-serif; font-size: 1.1em; font-weight: bold; color: white; background-color: var(--primary-color); border: none; border-radius: 8px; cursor: pointer; }
         #loader { text-align: center; padding: 50px; }
-        #loader p { font-size: 1.2rem; color: #555; }
         .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- Modal --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; z-index: 1000; }
         .modal-overlay.visible { opacity: 1; visibility: visible; }
         .modal-content { background-color: white; padding: 24px; border-radius: var(--border-radius); width: 90%; max-width: 400px; text-align: center; }
@@ -105,14 +48,13 @@
         .modal-content textarea { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; border: 1px solid #ccc; min-height: 100px; margin-bottom: 8px; font-family: "Noto Sans Thai", sans-serif; font-size: 1.1em; }
         .modal-helper-text { font-size: 0.9em; color: #555; margin-bottom: 16px; text-align: center; }
         .modal-button { display: block; width: 100%; padding: 14px; background-color: var(--primary-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: 700; }
-
     </style>
 </head>
 <body>
 
     <div id="loader">
         <div class="spinner"></div>
-        <p>กำลังโหลดข้อมูล...<br>ครั้งแรกอาจใช้เวลาสักครู่ครับ</p>
+        <p>กำลังโหลดข้อมูล...</p>
     </div>
 
     <div class="main-container" id="app-content" style="display: none;">
@@ -128,13 +70,21 @@
     </div>
 
     <div class="modal-overlay" id="share-modal">
+        <div class="modal-content">
+            <div id="modal-media-container"></div>
+            <textarea id="modal-text-input"></textarea>
+            <p class="modal-helper-text">สามารถแก้ไขข้อความที่จะส่งได้</p>
+            <button id="modal-share-button" class="modal-button">ส่งให้เพื่อน</button>
         </div>
+    </div>
 
 <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
 <script>
-    const LIFF_ID = "2005789397-37lemBgX";
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec";
+    // --- CONFIGURATION ---
+    const LIFF_ID = "2005789397-37lemBgX"; // Please verify this ID
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec"; // Please verify this URL
 
+    // --- GLOBAL VARIABLES ---
     let allStickers = [];
     let popularStickerIDs = [];
     let newStickerIDs = [];
@@ -142,6 +92,7 @@
     let currentFilteredStickers = [];
     const ITEMS_PER_PAGE = 15;
 
+    // --- INITIALIZATION ---
     async function main() {
         try {
             document.getElementById('loader').style.display = 'block';
@@ -153,23 +104,21 @@
             currentUserProfile = await liff.getProfile();
             await fetchStickers();
         } catch (error) {
-            console.error("Initialization Failed:", error);
-            document.getElementById('loader').innerHTML = `<p>เกิดข้อผิดพลาด: ${error.message}</p>`;
+            handleError("Initialization Failed", error);
         }
     }
 
     async function fetchStickers() {
         try {
             const response = await fetch(GAS_WEB_APP_URL);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
+            
             if (result.status === 'success') {
                 allStickers = result.data;
-
-                // --- Performance: Pre-calculate popular and new stickers once ---
                 popularStickerIDs = [...allStickers].sort((a, b) => (b.stat || 0) - (a.stat || 0)).slice(0, 3).map(s => s.stickerID);
                 newStickerIDs = [...allStickers].slice(-5).map(s => s.stickerID);
                 
-                // --- Render UI ---
                 populateCategoryFilter();
                 renderUI();
                 
@@ -179,56 +128,37 @@
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.error("Fetch Stickers Failed:", error);
-            document.getElementById('loader').innerHTML = `<p>ไม่สามารถโหลดข้อมูลสติกเกอร์ได้: ${error.message}</p>`;
+            handleError("Fetch Stickers Failed", error);
         }
     }
-    
+
+    // --- UI RENDERING ---
     function populateCategoryFilter() {
         const filterContainer = document.getElementById('category-filter-container');
         const categories = new Set();
         allStickers.forEach(s => s.category.split(',').forEach(cat => categories.add(cat.trim())));
         
         const sortedCategories = Array.from(categories).sort((a,b) => a.localeCompare(b));
+        const todayThai = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
+        const defaultCategories = ['คำแนะนำ', todayThai, 'สิ่งศักดิ์สิทธิ์'];
 
-        filterContainer.innerHTML = ''; // Clear previous
-        
-        // Add "Select All" checkbox
-        const allWrapper = document.createElement('div');
-        allWrapper.className = 'checkbox-wrapper';
-        allWrapper.id = 'select-all-wrapper';
-        allWrapper.innerHTML = `<input type="checkbox" id="select-all-cats"><label for="select-all-cats">แสดงทั้งหมด</label>`;
-        filterContainer.appendChild(allWrapper);
-
+        filterContainer.innerHTML = '';
         sortedCategories.forEach(cat => {
+            const isChecked = defaultCategories.includes(cat);
             const wrapper = document.createElement('div');
             wrapper.className = 'checkbox-wrapper';
-            wrapper.innerHTML = `<input type="checkbox" class="cat-checkbox" id="cat-${cat}" value="${cat}"><label for="cat-${cat}">${cat}</label>`;
+            wrapper.innerHTML = `<input type="checkbox" class="cat-checkbox" id="cat-${cat}" value="${cat}" ${isChecked ? 'checked' : ''}><label for="cat-${cat}">${cat}</label>`;
             filterContainer.appendChild(wrapper);
         });
-        
-        // Add event listeners
-        const selectAllCheckbox = document.getElementById('select-all-cats');
-        const categoryCheckboxes = document.querySelectorAll('.cat-checkbox');
 
-        selectAllCheckbox.addEventListener('change', (e) => {
-            categoryCheckboxes.forEach(cb => cb.checked = e.target.checked);
-            renderUI();
-        });
-
-        categoryCheckboxes.forEach(cb => {
-            cb.addEventListener('change', () => {
-                const allChecked = Array.from(categoryCheckboxes).every(c => c.checked);
-                selectAllCheckbox.checked = allChecked;
-                renderUI();
-            });
-        });
-        
-        // Set initial state to "Select All"
-        selectAllCheckbox.checked = true;
-        selectAllCheckbox.dispatchEvent(new Event('change'));
+        filterContainer.addEventListener('change', renderUI);
     }
 
+    function renderUI() {
+        renderDailySticker();
+        renderStickerLibrary();
+    }
+    
     function renderDailySticker() {
         const dailyContainer = document.getElementById('daily-sticker-container');
         dailyContainer.innerHTML = '';
@@ -243,18 +173,15 @@
         }
     }
 
-    function renderUI() {
-        renderDailySticker(); // Render the daily sticker part
-
+    function renderStickerLibrary() {
         const selectedCategories = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
-        let filteredStickers = selectedCategories.length > 0 ?
-            allStickers.filter(sticker => sticker.category.split(',').map(c => c.trim()).some(sc => selectedCategories.includes(sc))) :
-            [];
-
-        const popularInFilter = filteredStickers.filter(s => popularStickerIDs.includes(s.stickerID));
-        const popularIdsInFilter = popularInFilter.map(s => s.stickerID);
         
-        let regularStickers = filteredStickers.filter(s => !popularIdsInFilter.includes(s.stickerID));
+        const filtered = selectedCategories.length > 0 ?
+            allStickers.filter(s => s.category.split(',').map(c => c.trim()).some(sc => selectedCategories.includes(sc))) : [];
+
+        const popularInFilter = filtered.filter(s => popularStickerIDs.includes(s.stickerID));
+        const popularIdsInFilter = popularInFilter.map(s => s.stickerID);
+        const regularStickers = filtered.filter(s => !popularIdsInFilter.includes(s.stickerID));
         
         currentFilteredStickers = [...popularInFilter, ...shuffleArray(regularStickers)];
         
@@ -266,12 +193,8 @@
         });
 
         const loadMoreBtn = document.getElementById('load-more-btn');
-        if (currentFilteredStickers.length > ITEMS_PER_PAGE) {
-            loadMoreBtn.style.display = 'block';
-            loadMoreBtn.onclick = loadMoreStickers;
-        } else {
-            loadMoreBtn.style.display = 'none';
-        }
+        loadMoreBtn.style.display = currentFilteredStickers.length > ITEMS_PER_PAGE ? 'block' : 'none';
+        loadMoreBtn.onclick = loadMoreStickers;
     }
 
     function createStickerElement(sticker, options = {}) {
@@ -281,21 +204,17 @@
         
         const img = document.createElement('img');
         img.src = sticker.previewURL || sticker.imageURL;
-        img.alt = sticker.text.substring(0, 30);
+        img.alt = sticker.text ? sticker.text.substring(0, 30) : 'Sticker';
         img.loading = 'lazy';
         container.appendChild(img);
 
         if (!isDaily) {
-            let badgeText = '';
-            let badgeClass = '';
+            let badgeText = '', badgeClass = '';
             if (popularStickerIDs.includes(sticker.stickerID)) {
-                badgeText = 'ยอดนิยม';
-                badgeClass = 'badge-popular';
+                badgeText = 'ยอดนิยม'; badgeClass = 'badge-popular';
             } else if (newStickerIDs.includes(sticker.stickerID)) {
-                badgeText = 'มาใหม่';
-                badgeClass = 'badge-new';
+                badgeText = 'มาใหม่'; badgeClass = 'badge-new';
             }
-            
             if (badgeText) {
                 const badge = document.createElement('div');
                 badge.className = `sticker-badge ${badgeClass}`;
@@ -303,127 +222,19 @@
                 container.appendChild(badge);
             }
         }
-
         container.onclick = () => openModal(sticker);
         return container;
     }
-    
-    // --- CRITICAL FIX in shareMessage() ---
-    async function shareMessage(sticker) {
-        const userMessage = document.getElementById('modal-text-input').value.trim();
-        let messagesToSend = [];
 
-        try {
-            // This is the full, correct Flex Message object, replacing the placeholder comments.
-            // This fix ensures that a valid message is sent and the logging function is called.
-            if (sticker.category.includes('วิดีโอ')) {
-                messagesToSend.push({
-                    type: "flex",
-                    altText: "เพื่อนส่งวิดีโอให้คุณ",
-                    contents: { type: "bubble", size: "mega", body: { type: "box", layout: "vertical", paddingAll: "0px", contents: [ { type: "video", url: sticker.imageURL, previewUrl: sticker.previewURL, aspectRatio: "16:9" } ] }, footer: { type: "box", layout: "vertical", spacing: "sm", paddingAll: "md", backgroundColor: "#FFFFFF", alignItems: "center", contents: [ { type: "box", layout: "vertical", maxWidth: "70%", backgroundColor: "#FFFFFF", cornerRadius: "md", paddingAll: "sm", action: { type: "uri", label: "ส่งให้เพื่อน", uri: `https://liff.line.me/${LIFF_ID}` }, contents: [ { type: "text", text: "ส่งให้เพื่อน", color: "#111111", size: "sm", align: "center" } ] }, { type: "text", text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร", size: "xxs", color: "#AAAAAA", margin: "md", wrap: true } ] } }
-                });
-            } else {
-                 messagesToSend.push({
-                    type: "flex",
-                    altText: `เพื่อนส่งสติกเกอร์ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
-                    contents: { type: "bubble", size: "mega", hero: { type: "box", layout: "vertical", paddingAll: "0px", backgroundColor: sticker.flexBG || "#FFFFFF", contents: [ { type: "image", url: sticker.imageURL, size: "full", aspectMode: "fit", action: sticker.linkURL ? { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL } : undefined } ] }, footer: { type: "box", layout: "vertical", spacing: "sm", paddingAll: "md", backgroundColor: sticker.flexBG || "#FFFFFF", alignItems: "center", contents: [ { type: "box", layout: "vertical", maxWidth: "70%", backgroundColor: "#FFFFFF", cornerRadius: "md", paddingAll: "sm", action: { type: "uri", label: "ส่งให้เพื่อน", uri: `https://liff.line.me/${LIFF_ID}` }, contents: [ { type: "text", text: "ส่งให้เพื่อน", color: "#111111", size: "sm", align: "center" } ] }, { type: "text", text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร", size: "xxs", color: "#AAAAAA", margin: "md", wrap: true } ] } }
-                });
-            }
-
-            if (userMessage) {
-                messagesToSend.push({ type: "text", text: userMessage });
-            }
-
-            if (messagesToSend.length === 0) {
-              alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้");
-              return;
-            }
-
-            const result = await liff.shareTargetPicker(messagesToSend);
-            if (result) {
-                closeModal();
-                await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
-                liff.closeWindow();
-            }
-        } catch (error) {
-            console.error("Share Failed:", error);
-            alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
-        }
-    }
-    
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    function renderUI() {
-        const selectedCategories = Array.from(document.querySelectorAll('#category-filter-container input:checked')).map(cb => cb.value);
-        
-        let filteredStickers = [];
-        if (selectedCategories.length > 0) {
-            filteredStickers = allStickers.filter(sticker => {
-                const stickerCats = sticker.category.split(',').map(c => c.trim());
-                return stickerCats.some(sc => selectedCategories.includes(sc));
-            });
-        }
-
-        // Sort to get top 3 popular stickers from the filtered list
-        const popularStickers = [...filteredStickers].sort((a, b) => (b.stat || 0) - (a.stat || 0)).slice(0, 3);
-        const popularIds = popularStickers.map(s => s.stickerID);
-        
-        // Get the rest and shuffle them
-        let regularStickers = filteredStickers.filter(s => !popularIds.includes(s.stickerID));
-        regularStickers = shuffleArray(regularStickers);
-        
-        // Combine them: popular first, then the rest (randomized)
-        currentFilteredStickers = [...popularStickers, ...regularStickers];
-        
-        const libraryContainer = document.getElementById('sticker-library-container');
-        libraryContainer.innerHTML = '';
-        
-        const initialDisplay = currentFilteredStickers.slice(0, ITEMS_PER_PAGE);
-        initialDisplay.forEach(sticker => {
-            libraryContainer.appendChild(createStickerElement(sticker));
-        });
-
-        // Setup "Load More" button
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        if (currentFilteredStickers.length > ITEMS_PER_PAGE) {
-            loadMoreBtn.style.display = 'block';
-            loadMoreBtn.onclick = loadMoreStickers;
-        } else {
-            loadMoreBtn.style.display = 'none';
-        }
-    }
-    
     function loadMoreStickers() {
         const libraryContainer = document.getElementById('sticker-library-container');
-        const remainingStickers = currentFilteredStickers.slice(ITEMS_PER_PAGE);
-        
-        remainingStickers.forEach(sticker => {
+        currentFilteredStickers.slice(ITEMS_PER_PAGE).forEach(sticker => {
             libraryContainer.appendChild(createStickerElement(sticker));
         });
-
         document.getElementById('load-more-btn').style.display = 'none';
     }
 
-    function createStickerElement(sticker) {
-        const container = document.createElement('div');
-        container.className = 'sticker-item';
-        
-        const img = document.createElement('img');
-        img.src = sticker.previewURL || sticker.imageURL;
-        img.alt = sticker.text.substring(0, 30);
-        img.loading = 'lazy';
-        container.appendChild(img);
-
-        container.onclick = () => openModal(sticker);
-        return container;
-    }
-
+    // --- MODAL & SHARING ---
     function openModal(sticker) {
         const modal = document.getElementById('share-modal');
         const mediaContainer = document.getElementById('modal-media-container');
@@ -432,11 +243,7 @@
         if (sticker.category.includes('วิดีโอ') && sticker.imageURL) {
             const video = document.createElement('video');
             video.src = sticker.imageURL;
-            video.controls = true;
-            video.autoplay = true;
-            video.muted = true;
-            video.loop = true;
-            video.playsInline = true;
+            video.controls = true; video.autoplay = true; video.muted = true; video.loop = true; video.playsInline = true;
             mediaContainer.appendChild(video);
         } else {
             const img = document.createElement('img');
@@ -446,168 +253,101 @@
 
         document.getElementById('modal-text-input').value = sticker.text;
         document.getElementById('modal-share-button').onclick = () => shareMessage(sticker);
-        modal.onclick = (e) => { if (e.target === modal) closeModal(); }; // Close on overlay click
         modal.classList.add('visible');
     }
 
     function closeModal() {
-        const modal = document.getElementById('share-modal');
-        const mediaContainer = document.getElementById('modal-media-container');
-        mediaContainer.innerHTML = '';
-        modal.classList.remove('visible');
+        document.getElementById('share-modal').classList.remove('visible');
+    }
+    
+    // --- REFACTORED AND FIXED FLEX MESSAGE LOGIC ---
+    function createFlexFooter(bgColor = '#FFFFFF') {
+        return {
+            type: "box", layout: "vertical", spacing: "sm", paddingAll: "md", backgroundColor: bgColor, alignItems: "center",
+            contents: [
+                { type: "box", layout: "vertical", maxWidth: "70%", backgroundColor: "#FFFFFF", cornerRadius: "md", paddingAll: "sm", action: { type: "uri", label: "ส่งให้เพื่อน", uri: `https://liff.line.me/${LIFF_ID}` }, contents: [{ type: "text", text: "ส่งให้เพื่อน", color: "#111111", size: "sm", align: "center" }] },
+                { type: "text", text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร", size: "xxs", color: "#AAAAAA", margin: "md", wrap: true }
+            ]
+        };
     }
 
- async function shareMessage(sticker) {
-    // Helper function to ensure color codes are valid for the Flex Message
-    const getValidHexColor = (colorString) => {
-        if (typeof colorString === 'string' && colorString.startsWith('#') && (colorString.length === 7 || colorString.length === 9)) {
-            return colorString;
+    function createImageFlex(sticker) {
+        const safeFlexBG = (sticker.flexBG && sticker.flexBG.startsWith('#')) ? sticker.flexBG : '#FFFFFF';
+        const heroBlock = { type: "box", layout: "vertical", paddingAll: "0px", backgroundColor: safeFlexBG, contents: [{ type: "image", url: sticker.imageURL, size: "full", aspectMode: "fit" }] };
+        if (sticker.linkURL) {
+            heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
         }
-        return '#FFFFFF'; // Default to white if invalid
-    };
+        return { type: "flex", altText: `เพื่อนส่งสติกเกอร์ให้คุณ`, contents: { type: "bubble", size: "mega", hero: heroBlock, footer: createFlexFooter(safeFlexBG) }};
+    }
 
-    const userMessage = document.getElementById('modal-text-input').value.trim();
-    let messagesToSend = [];
+    function createVideoFlex(sticker) {
+        if (!sticker.imageURL || !sticker.previewURL) return null;
+        return { type: "flex", altText: "เพื่อนส่งวิดีโอให้คุณ", contents: { type: "bubble", size: "mega", body: { type: "box", layout: "vertical", paddingAll: "0px", contents: [{ type: "video", url: sticker.imageURL, previewUrl: sticker.previewURL, aspectRatio: "16:9" }] }, footer: createFlexFooter() }};
+    }
 
-    try {
-        // --- FIX: Replaced placeholder comments with full Flex Message JSON ---
+    async function shareMessage(sticker) {
+        const userMessage = document.getElementById('modal-text-input').value.trim();
+        let messagesToSend = [];
+        let flexMessage;
+
         if (sticker.category.includes('วิดีโอ')) {
-            // Check for required URLs for video messages
-            if (!sticker.imageURL || !sticker.previewURL) {
-                console.error("Video share failed: Missing imageURL or previewURL for stickerID:", sticker.stickerID);
-                alert("ข้อมูลวิดีโอไม่สมบูรณ์ ไม่สามารถแชร์ได้");
-                return;
-            }
-
-            messagesToSend.push({
-                type: "flex",
-                altText: "เพื่อนส่งวิดีโอให้คุณ",
-                contents: {
-                    type: "bubble",
-                    size: "mega",
-                    body: {
-                        type: "box",
-                        layout: "vertical",
-                        paddingAll: "0px",
-                        contents: [{
-                            type: "video",
-                            url: sticker.imageURL,
-                            previewUrl: sticker.previewURL,
-                            aspectRatio: "16:9"
-                        }]
-                    },
-                    footer: {
-                        type: "box",
-                        layout: "vertical",
-                        spacing: "sm",
-                        paddingAll: "md",
-                        backgroundColor: "#FFFFFF",
-                        alignItems: "center",
-                        contents: [{
-                            type: "box",
-                            layout: "vertical",
-                            maxWidth: "70%",
-                            backgroundColor: "#FFFFFF",
-                            cornerRadius: "md",
-                            paddingAll: "sm",
-                            action: { type: "uri", label: "ส่งให้เพื่อน", uri: `https://liff.line.me/${LIFF_ID}` },
-                            contents: [{ type: "text", text: "ส่งให้เพื่อน", color: "#111111", size: "sm", align: "center" }]
-                        }, {
-                            type: "text",
-                            text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-                            size: "xxs",
-                            color: "#AAAAAA",
-                            margin: "md",
-                            wrap: true
-                        }]
-                    }
-                }
-            });
+            flexMessage = createVideoFlex(sticker);
         } else {
-            const safeFlexBG = getValidHexColor(sticker.flexBG);
-            const heroBlock = {
-                type: "box",
-                layout: "vertical",
-                paddingAll: "0px",
-                backgroundColor: safeFlexBG,
-                contents: [{ type: "image", url: sticker.imageURL, size: "full", aspectMode: "fit" }]
-            };
-
-            if (sticker.linkURL) {
-                heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL };
-            }
-
-            messagesToSend.push({
-                type: "flex",
-                altText: `เพื่อนส่งสติกเกอร์ "${sticker.text.substring(0, 20)}..." ให้คุณ`,
-                contents: {
-                    type: "bubble",
-                    size: "mega",
-                    hero: heroBlock,
-                    footer: {
-                        type: "box",
-                        layout: "vertical",
-                        spacing: "sm",
-                        paddingAll: "md",
-                        backgroundColor: safeFlexBG,
-                        alignItems: "center",
-                        contents: [{
-                            type: "box",
-                            layout: "vertical",
-                            maxWidth: "70%",
-                            backgroundColor: "#FFFFFF",
-                            cornerRadius: "md",
-                            paddingAll: "sm",
-                            action: { type: "uri", label: "ส่งให้เพื่อน", uri: `https://liff.line.me/${LIFF_ID}` },
-                            contents: [{ type: "text", text: "ส่งให้เพื่อน", color: "#111111", size: "sm", align: "center" }]
-                        }, {
-                            type: "text",
-                            text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-                            size: "xxs",
-                            color: "#AAAAAA",
-                            margin: "md",
-                            wrap: true
-                        }]
-                    }
-                }
-            });
+            flexMessage = createImageFlex(sticker);
         }
+
+        if (!flexMessage) {
+            alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้ ข้อมูลอาจไม่สมบูรณ์");
+            return;
+        }
+        messagesToSend.push(flexMessage);
 
         if (userMessage) {
             messagesToSend.push({ type: "text", text: userMessage });
         }
 
-        if (messagesToSend.length === 0) {
-            alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้");
-            return;
+        try {
+            const result = await liff.shareTargetPicker(messagesToSend);
+            if (result) {
+                closeModal();
+                await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
+                liff.closeWindow();
+            }
+        } catch (error) {
+            handleError("Share Failed", error);
         }
-
-        const result = await liff.shareTargetPicker(messagesToSend);
-        if (result) {
-            closeModal();
-            await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
-            liff.closeWindow();
-        }
-    } catch (error) {
-        console.error("Share Failed:", error);
-        alert("เกิดข้อผิดพลาดในการแชร์: " + error.message);
     }
-}
 
     async function logAndIncrementStat(stickerID, userID) {
         try {
             await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ stickerID, userID })
+                body: JSON.stringify({ stickerID, userID }),
+                mode: 'no-cors' // Use no-cors for fire-and-forget logging
             });
         } catch (error) {
             console.error("Log/Increment request failed:", error);
         }
     }
+    
+    // --- UTILITIES ---
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
 
+    function handleError(context, error) {
+        console.error(`${context}:`, error);
+        const loader = document.getElementById('loader');
+        if(loader) loader.innerHTML = `<p>เกิดข้อผิดพลาด: ${error.message}<br>กรุณาลองใหม่อีกครั้ง</p>`;
+    }
+
+    // --- START APP ---
     main();
-
 </script>
 </body>
 </html>
