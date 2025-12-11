@@ -7,59 +7,213 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #007BFF;
             --background-color: #f0f2f5;
             --card-bg-color: #ffffff;
             --text-color: #333;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --border-radius: 16px;
             --badge-popular-bg: #dc2626;
             --badge-new-bg: #2563eb;
         }
-        body { font-family: "Noto Sans Thai", sans-serif; background-color: var(--background-color); margin: 0; padding: 16px; }
-        .main-container { max-width: 600px; margin: 0 auto; }
-        .section-title { font-size: 1.5em; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary-color); }
-        .daily-sticker-card { background-color: var(--card-bg-color); border-radius: var(--border-radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 24px; cursor: pointer; transition: transform 0.2s ease; }
+
+        /* --- 1. Global Font Size Increase (Elderly Friendly) --- */
+        body { 
+            font-family: "Noto Sans Thai", sans-serif; 
+            background-color: var(--background-color); 
+            margin: 0; padding: 0;
+            font-size: 22px; /* เพิ่มขนาดพื้นฐาน */
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .main-container { max-width: 600px; margin: 0 auto; padding: 20px; }
+
+        /* --- 2. Loading Screen (Black BG + Spin + Blinking Text) --- */
+        #loading { 
+            position: fixed; top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: #000; 
+            display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; 
+            z-index: 2000; color: white; text-align: center; 
+        }
+        .spinner {
+            border: 8px solid #333; 
+            border-top: 8px solid #ffc107; 
+            border-radius: 50%;
+            width: 80px; height: 80px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #loading-text { font-size: 2rem; font-weight: bold; margin-bottom: 10px; color: #fff; }
+        .loading-prefix { font-size: 1.2rem; margin-bottom: 5px; color: #aaa; }
+        #loading-subtext { 
+            font-size: 4rem; font-weight: 800; color: #ffc107; 
+            min-height: 100px; line-height: 1.2; 
+            text-shadow: 2px 2px 10px rgba(255,193,7,0.5); 
+            opacity: 1; transition: opacity 0.5s ease-in-out; 
+        }
+
+        /* --- 3. Instruction Box (New) --- */
+        .instruction-box {
+            background-color: #e3f2fd;
+            border: 3px solid #2196f3;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+        .instruction-box h3 { margin-top: 0; font-size: 1.4em; color: #0d47a1; text-align: center; margin-bottom: 15px;}
+        .step-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 1.1em; font-weight: bold; }
+        .step-num { 
+            background: #2196f3; color: white; width: 35px; height: 35px; 
+            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+            margin-right: 15px; flex-shrink: 0; font-size: 1.2em;
+        }
+
+        /* --- Titles --- */
+        .section-title { 
+            font-size: 1.6em; font-weight: 700; 
+            margin-bottom: 20px; padding-bottom: 10px; 
+            border-bottom: 4px solid var(--primary-color); 
+        }
+
+        /* --- Daily Sticker --- */
+        .daily-sticker-card { 
+            background-color: var(--card-bg-color); 
+            border-radius: var(--border-radius); 
+            box-shadow: var(--shadow); 
+            padding: 20px; margin-bottom: 30px; 
+            cursor: pointer; transition: transform 0.2s ease; 
+            text-align: center;
+        }
         .daily-sticker-card:hover { transform: translateY(-5px); }
-        .daily-sticker-card img { width: 100%; border-radius: 8px; }
-        .filter-container { margin-bottom: 20px; }
-        #category-filter-container { display: flex; flex-wrap: wrap; gap: 10px; }
-        .checkbox-wrapper { display: inline-flex; align-items: center; }
-        .checkbox-wrapper input[type="checkbox"] { margin-right: 6px; width: 18px; height: 18px; cursor: pointer; }
-        .checkbox-wrapper label { font-size: 0.95em; cursor: pointer; user-select: none; }
-        .sticker-library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px; }
+        .daily-sticker-card img { width: 100%; border-radius: 12px; }
+        .daily-label { font-size: 1.2em; font-weight: bold; color: var(--primary-color); margin-bottom: 10px; }
+
+        /* --- Filters --- */
+        .filter-container { margin-bottom: 25px; }
+        #category-filter-container { display: flex; flex-wrap: wrap; gap: 15px; }
+        .checkbox-wrapper { 
+            display: inline-flex; align-items: center; 
+            background: #fff; padding: 10px 15px; 
+            border-radius: 30px; border: 2px solid #ddd;
+        }
+        .checkbox-wrapper input[type="checkbox"] { 
+            margin-right: 10px; width: 24px; height: 24px; cursor: pointer; 
+        }
+        .checkbox-wrapper label { font-size: 1.1em; cursor: pointer; font-weight: bold; }
+
+        /* --- Sticker Grid --- */
+        .sticker-library-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* ใหญ่ขึ้น */
+            gap: 20px; 
+        }
         .sticker-item { position: relative; cursor: pointer; transition: transform 0.2s ease; }
         .sticker-item:hover { transform: scale(1.05); }
-        .sticker-item img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        .sticker-badge { position: absolute; top: 5px; left: 5px; color: white; font-size: 0.7em; font-weight: bold; padding: 3px 8px; border-radius: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .sticker-item img { 
+            width: 100%; aspect-ratio: 1 / 1; object-fit: cover; 
+            border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        }
+        .sticker-badge { 
+            position: absolute; top: 8px; left: 8px; 
+            color: white; font-size: 0.9em; font-weight: bold; 
+            padding: 5px 12px; border-radius: 20px; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
         .badge-popular { background-color: var(--badge-popular-bg); }
         .badge-new { background-color: var(--badge-new-bg); }
-        #load-more-btn { display: block; width: 100%; padding: 12px; margin-top: 24px; font-family: "Noto Sans Thai", sans-serif; font-size: 1.1em; font-weight: bold; color: white; background-color: var(--primary-color); border: none; border-radius: 8px; cursor: pointer; }
-        #loader { text-align: center; padding: 50px; }
-        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; z-index: 1000; }
+
+        /* --- Load More Button --- */
+        #load-more-btn { 
+            display: block; width: 100%; padding: 18px; margin-top: 30px; 
+            font-family: "Noto Sans Thai", sans-serif; font-size: 1.3em; 
+            font-weight: bold; color: white; background-color: var(--primary-color); 
+            border: none; border-radius: 12px; cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* --- Modal (Sharing) --- */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: rgba(0, 0, 0, 0.85); 
+            display: flex; justify-content: center; align-items: center; 
+            opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; 
+            z-index: 3000; 
+        }
         .modal-overlay.visible { opacity: 1; visibility: visible; }
-        .modal-content { position: relative; background-color: white; padding: 24px; border-radius: var(--border-radius); width: 90%; max-width: 400px; text-align: center; }
-        .close-modal { position: absolute; top: -10px; right: -10px; background: #333; color: white; border-radius: 50%; border: 2px solid white; width: 32px; height: 32px; font-size: 1.5em; line-height: 28px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        #modal-media-container { margin-bottom: 16px; }
-        #modal-media-container img, #modal-media-container video { width: 100%; max-width: 280px; max-height: 280px; border-radius: 8px; object-fit: contain; }
-        .modal-content textarea { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; border: 1px solid #ccc; min-height: 100px; margin-bottom: 8px; font-family: "Noto Sans Thai", sans-serif; font-size: 1.1em; }
-        .modal-helper-text { font-size: 0.9em; color: #555; margin-bottom: 16px; text-align: center; }
-        .modal-button { display: block; width: 100%; padding: 14px; background-color: var(--primary-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: 700; }
+        .modal-content { 
+            position: relative; background-color: white; padding: 30px; 
+            border-radius: 20px; width: 90%; max-width: 450px; text-align: center; 
+        }
+        .close-modal { 
+            position: absolute; top: -15px; right: -15px; 
+            background: #d32f2f; color: white; border-radius: 50%; 
+            border: 3px solid white; width: 45px; height: 45px; 
+            font-size: 2em; line-height: 38px; cursor: pointer; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
+        }
+        #modal-media-container { margin-bottom: 20px; }
+        #modal-media-container img, #modal-media-container video { 
+            width: 100%; max-width: 320px; max-height: 320px; 
+            border-radius: 12px; object-fit: contain; 
+            border: 1px solid #eee;
+        }
+        .modal-content textarea { 
+            width: 100%; box-sizing: border-box; padding: 15px; 
+            border-radius: 12px; border: 2px solid #ccc; 
+            min-height: 120px; margin-bottom: 10px; 
+            font-family: "Noto Sans Thai", sans-serif; font-size: 1.2em; 
+        }
+        .modal-helper-text { font-size: 1em; color: #666; margin-bottom: 20px; text-align: center; }
+        .modal-button { 
+            display: block; width: 100%; padding: 18px; 
+            background-color: #28a745; color: #fff; border: none; 
+            border-radius: 12px; cursor: pointer; font-size: 1.4em; font-weight: 700; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="spinner"></div><p>กำลังโหลดข้อมูล...</p></div>
+    <div id="loading">
+        <div class="spinner"></div>
+        <div id="loading-text">กำลังโหลดข้อมูล...</div>
+        <div class="loading-prefix">จำใส่ใจอาการสโตรก:</div>
+        <div id="loading-subtext"></div>
+    </div>
 
     <div class="main-container" id="app-content" style="display: none;">
+        
+        <div class="instruction-box">
+            <h3>📢 วิธีแชร์ง่ายๆ</h3>
+            <div class="step-item">
+                <div class="step-num">1</div>
+                <div>คลิกที่รูปภาพที่ต้องการแชร์</div>
+            </div>
+            <div class="step-item">
+                <div class="step-num">2</div>
+                <div>แก้ไขข้อความเป็นของตัวเองได้</div>
+            </div>
+            <div class="step-item">
+                <div class="step-num">3</div>
+                <div>กดปุ่ม "ส่งให้เพื่อน"</div>
+            </div>
+        </div>
+
         <h2 class="section-title">สติกเกอร์ประจำวันนี้</h2>
         <div id="daily-sticker-container"></div>
-        <h2 class="section-title" style="margin-top: 32px;">คลังสติกเกอร์</h2>
+        
+        <h2 class="section-title" style="margin-top: 40px;">คลังสติกเกอร์</h2>
         <div class="filter-container"><div id="category-filter-container"></div></div>
+        
         <div class="sticker-library-grid" id="sticker-library-container"></div>
         <button id="load-more-btn" style="display: none;">แสดงเพิ่ม</button>
     </div>
@@ -69,7 +223,7 @@
             <button class="close-modal" onclick="closeModal()">&times;</button>
             <div id="modal-media-container"></div>
             <textarea id="modal-text-input"></textarea>
-            <p class="modal-helper-text">สามารถแก้ไขข้อความที่จะส่งได้</p>
+            <p class="modal-helper-text">พิมพ์ข้อความทักทายเพิ่มเติมได้ที่นี่</p>
             <button id="modal-share-button" class="modal-button">ส่งให้เพื่อน</button>
         </div>
     </div>
@@ -83,16 +237,44 @@
     // --- GLOBAL VARIABLES ---
     let allStickers = [], popularStickerIDs = [], newStickerIDs = [], currentUserProfile = {}, currentFilteredStickers = [];
     const ITEMS_PER_PAGE = 15;
+    let loadingInterval;
+
+    // --- LOADING ANIMATION LOGIC ---
+    function startLoadingAnimation() {
+        const msgs = ["เซมึนหัว", "ตามัวมาก", "มุมปากตก", "ยกแขนยาก", "ลำบากพูด"];
+        let i = 0;
+        const sub = document.getElementById('loading-subtext');
+        
+        if(sub) sub.textContent = msgs[0];
+
+        loadingInterval = setInterval(() => {
+            if(sub) sub.style.opacity = 0;
+            setTimeout(() => {
+                i = (i + 1) % msgs.length;
+                if(sub) sub.textContent = msgs[i];
+                if(sub) sub.style.opacity = 1;
+            }, 500);
+        }, 2500);
+    }
+
+    function stopLoadingAnimation() {
+        clearInterval(loadingInterval);
+        document.getElementById('loading').style.display = 'none';
+    }
 
     // --- INITIALIZATION ---
     async function main() {
         try {
-            document.getElementById('loader').style.display = 'block';
+            startLoadingAnimation();
             await liff.init({ liffId: LIFF_ID });
             if (!liff.isLoggedIn()) { liff.login(); return; }
             currentUserProfile = await liff.getProfile();
             await fetchStickers();
-        } catch (error) { handleError("Initialization Failed", error); }
+        } catch (error) { 
+            console.error("Init Error", error);
+            alert("เกิดข้อผิดพลาดในการโหลด โปรดปิดแล้วเปิดใหม่");
+            stopLoadingAnimation();
+        }
     }
 
     async function fetchStickers() {
@@ -109,10 +291,13 @@
                 populateCategoryFilter();
                 renderUI();
                 
-                document.getElementById('loader').style.display = 'none';
+                stopLoadingAnimation();
                 document.getElementById('app-content').style.display = 'block';
             } else { throw new Error(result.message); }
-        } catch (error) { handleError("Fetch Stickers Failed", error); }
+        } catch (error) { 
+            console.error("Fetch Error", error);
+            stopLoadingAnimation();
+        }
     }
 
     // --- UI RENDERING ---
@@ -147,7 +332,7 @@
         if (dailyStickers.length > 0) {
             const randomSticker = dailyStickers[Math.floor(Math.random() * dailyStickers.length)];
             dailyContainer.appendChild(createStickerElement(randomSticker, { isDaily: true }));
-        } else { dailyContainer.innerHTML = '<p>ไม่มีสติกเกอร์สำหรับวันนี้</p>'; }
+        } else { dailyContainer.innerHTML = '<p style="text-align:center; font-size:1.2em;">ไม่มีสติกเกอร์สำหรับวันนี้</p>'; }
     }
 
     function renderStickerLibrary() {
@@ -169,6 +354,14 @@
         const { isDaily = false } = options;
         const container = document.createElement('div');
         container.className = isDaily ? 'daily-sticker-card' : 'sticker-item';
+        
+        if (isDaily) {
+            const label = document.createElement('div');
+            label.className = 'daily-label';
+            label.textContent = "✨ แนะนำสำหรับวันนี้";
+            container.appendChild(label);
+        }
+
         const img = document.createElement('img');
         img.src = sticker.previewURL || sticker.imageURL;
         img.alt = sticker.text ? sticker.text.substring(0, 30) : 'Sticker';
@@ -176,8 +369,8 @@
         container.appendChild(img);
         if (!isDaily) {
             let badgeText = '', badgeClass = '';
-            if (popularStickerIDs.includes(sticker.stickerID)) { badgeText = 'ยอดนิยม'; badgeClass = 'badge-popular'; } 
-            else if (newStickerIDs.includes(sticker.stickerID)) { badgeText = 'มาใหม่'; badgeClass = 'badge-new'; }
+            if (popularStickerIDs.includes(sticker.stickerID)) { badgeText = 'ยอดนิยม 🔥'; badgeClass = 'badge-popular'; } 
+            else if (newStickerIDs.includes(sticker.stickerID)) { badgeText = 'มาใหม่ 🆕'; badgeClass = 'badge-new'; }
             if (badgeText) {
                 const badge = document.createElement('div');
                 badge.className = `sticker-badge ${badgeClass}`;
@@ -210,7 +403,7 @@
             img.src = sticker.imageURL;
             mediaContainer.appendChild(img);
         }
-        document.getElementById('modal-text-input').value = sticker.text;
+        document.getElementById('modal-text-input').value = sticker.text || "สวัสดีครับ/ค่ะ";
         document.getElementById('modal-share-button').onclick = () => shareMessage(sticker);
         modal.onclick = (e) => { if (e.target === modal) closeModal(); };
         modal.classList.add('visible');
@@ -224,53 +417,17 @@
     }
     
     // --- FLEX MESSAGE LOGIC ---
-
-    // ***** THIS FUNCTION HAS BEEN MODIFIED *****
     function createFlexFooter(bgColor = '#FFFFFF') {
         return {
-            type: "box",
-            layout: "vertical",
-            spacing: "sm",
-            paddingAll: "md",
-            backgroundColor: bgColor,
-            alignItems: "center",
-            // Add the action to the entire footer box
-            action: {
-                type: "uri",
-                label: "เปิด LINE Official", // This label is required but not visible
-                uri: "https://lin.ee/MjUwBob"
-            },
+            type: "box", layout: "vertical", spacing: "sm", paddingAll: "md", backgroundColor: bgColor, alignItems: "center",
+            action: { type: "uri", label: "เปิด LINE Official", uri: "https://lin.ee/MjUwBob" },
             contents: [
-                // The button's action will override the parent's action, so it still works
                 {
-                    type: "box",
-                    layout: "vertical",
-                    maxWidth: "70%",
-                    backgroundColor: "#FFFFFF",
-                    cornerRadius: "md",
-                    paddingAll: "sm",
-                    action: {
-                        type: "uri",
-                        label: "ส่งให้เพื่อน",
-                        uri: `https://liff.line.me/${LIFF_ID}`
-                    },
-                    contents: [{
-                        type: "text",
-                        text: "ส่งให้เพื่อน",
-                        color: "#111111",
-                        size: "sm",
-                        align: "center"
-                    }]
+                    type: "box", layout: "vertical", maxWidth: "70%", backgroundColor: "#FFFFFF", cornerRadius: "md", paddingAll: "sm",
+                    action: { type: "uri", label: "ส่งให้เพื่อน", uri: `https://liff.line.me/${LIFF_ID}` },
+                    contents: [{ type: "text", text: "ส่งให้เพื่อน", color: "#111111", size: "sm", align: "center" }]
                 },
-                // The credit text will now be clickable and link to the LINE OA
-                {
-                    type: "text",
-                    text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร",
-                    size: "xxs",
-                    color: "#AAAAAA",
-                    margin: "md",
-                    wrap: true
-                }
+                { type: "text", text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร", size: "xxs", color: "#AAAAAA", margin: "md", wrap: true }
             ]
         };
     }
@@ -304,7 +461,7 @@
                 await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
                 liff.closeWindow();
             }
-        } catch (error) { handleError("Share Failed", error); }
+        } catch (error) { console.error("Share Error", error); }
     }
 
     async function logAndIncrementStat(stickerID, userID) {
@@ -315,7 +472,6 @@
     
     // --- UTILITIES ---
     function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
-    function handleError(context, error) { console.error(`${context}:`, error); const loader = document.getElementById('loader'); if(loader) loader.innerHTML = `<p>เกิดข้อผิดพลาด: ${error.message}<br>กรุณาลองใหม่อีกครั้ง</p>`; }
 
     // --- START APP ---
     main();
