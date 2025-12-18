@@ -3,478 +3,583 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>คลังสติกเกอร์สวีรู้ทันสโตรก</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+    <title>ส่งสติกเกอร์ความรู้สู้สโตรก</title>
+    
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Noto Sans Thai -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
     <style>
         :root {
-            --primary-color: #007BFF;
-            --background-color: #f0f2f5;
-            --card-bg-color: #ffffff;
-            --text-color: #333;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            --border-radius: 16px;
-            --badge-popular-bg: #dc2626;
-            --badge-new-bg: #2563eb;
+            --primary-red: #ff3654;
+            --font-main: 'Noto Sans Thai', sans-serif;
+            --text-color: #333333;
+            --card-radius: 30px;
+            --shadow-soft: 0 10px 30px rgba(0,0,0,0.15);
+            --shadow-text: 2px 2px 5px rgba(0,0,0,0.3);
         }
 
-        /* --- 1. Global Font Size Increase (Elderly Friendly) --- */
-        body { 
-            font-family: "Noto Sans Thai", sans-serif; 
-            background-color: var(--background-color); 
-            margin: 0; padding: 0;
-            font-size: 22px; /* เพิ่มขนาดพื้นฐาน */
-            line-height: 1.6;
+        body {
+            font-family: var(--font-main);
+            font-size: 26px; /* Super Elderly Friendly */
+            line-height: 1.4;
             color: var(--text-color);
+            background: linear-gradient(180deg, var(--primary-red) 0%, #ffffff 450px);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding-bottom: 100px; /* Space for bottom bar */
         }
 
-        .main-container { max-width: 600px; margin: 0 auto; padding: 20px; }
-
-        /* --- 2. Loading Screen (Black BG + Spin + Blinking Text) --- */
-        #loading { 
-            position: fixed; top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: #000; 
-            display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; 
-            z-index: 2000; color: white; text-align: center; 
-        }
-        .spinner {
-            border: 8px solid #333; 
-            border-top: 8px solid #ffc107; 
-            border-radius: 50%;
-            width: 80px; height: 80px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 30px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #loading-text { font-size: 2rem; font-weight: bold; margin-bottom: 10px; color: #fff; }
-        .loading-prefix { font-size: 1.2rem; margin-bottom: 5px; color: #aaa; }
-        #loading-subtext { 
-            font-size: 4rem; font-weight: 800; color: #ffc107; 
-            min-height: 100px; line-height: 1.2; 
-            text-shadow: 2px 2px 10px rgba(255,193,7,0.5); 
-            opacity: 1; transition: opacity 0.5s ease-in-out; 
-        }
-
-        /* --- 3. Instruction Box (New) --- */
-        .instruction-box {
-            background-color: #e3f2fd;
-            border: 3px solid #2196f3;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow);
-        }
-        .instruction-box h3 { margin-top: 0; font-size: 1.4em; color: #0d47a1; text-align: center; margin-bottom: 15px;}
-        .step-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 1.1em; font-weight: bold; }
-        .step-num { 
-            background: #2196f3; color: white; width: 35px; height: 35px; 
-            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
-            margin-right: 15px; flex-shrink: 0; font-size: 1.2em;
-        }
-
-        /* --- Titles --- */
-        .section-title { 
-            font-size: 1.6em; font-weight: 700; 
-            margin-bottom: 20px; padding-bottom: 10px; 
-            border-bottom: 4px solid var(--primary-color); 
-        }
-
-        /* --- Daily Sticker --- */
-        .daily-sticker-card { 
-            background-color: var(--card-bg-color); 
-            border-radius: var(--border-radius); 
-            box-shadow: var(--shadow); 
-            padding: 20px; margin-bottom: 30px; 
-            cursor: pointer; transition: transform 0.2s ease; 
+        /* --- Header --- */
+        .app-header {
+            padding: 30px 15px 20px;
             text-align: center;
         }
-        .daily-sticker-card:hover { transform: translateY(-5px); }
-        .daily-sticker-card img { width: 100%; border-radius: 12px; }
-        .daily-label { font-size: 1.2em; font-weight: bold; color: var(--primary-color); margin-bottom: 10px; }
+        .app-title {
+            color: white;
+            font-weight: 900;
+            font-size: 32px;
+            text-shadow: var(--shadow-text);
+            margin: 0;
+        }
 
-        /* --- Filters --- */
-        .filter-container { margin-bottom: 25px; }
-        #category-filter-container { display: flex; flex-wrap: wrap; gap: 15px; }
-        .checkbox-wrapper { 
-            display: inline-flex; align-items: center; 
-            background: #fff; padding: 10px 15px; 
-            border-radius: 30px; border: 2px solid #ddd;
+        /* --- Main Card --- */
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 15px;
         }
-        .checkbox-wrapper input[type="checkbox"] { 
-            margin-right: 10px; width: 24px; height: 24px; cursor: pointer; 
+        .main-card {
+            background: white;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-soft);
+            padding: 25px;
+            border: 1px solid #f0f0f0;
+            min-height: 300px;
         }
-        .checkbox-wrapper label { font-size: 1.1em; cursor: pointer; font-weight: bold; }
 
-        /* --- Sticker Grid --- */
-        .sticker-library-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* ใหญ่ขึ้น */
-            gap: 20px; 
+        /* --- Daily Sticker Section --- */
+        .daily-wrapper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 30px;
         }
-        .sticker-item { position: relative; cursor: pointer; transition: transform 0.2s ease; }
-        .sticker-item:hover { transform: scale(1.05); }
-        .sticker-item img { 
-            width: 100%; aspect-ratio: 1 / 1; object-fit: cover; 
-            border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        .daily-wrapper:active { transform: scale(0.98); }
+        .daily-img {
+            width: 100%;
+            display: block;
         }
-        .sticker-badge { 
-            position: absolute; top: 8px; left: 8px; 
-            color: white; font-size: 0.9em; font-weight: bold; 
-            padding: 5px 12px; border-radius: 20px; 
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5); 
+        .daily-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-share-overlay {
+            background-color: #25d366; /* Line Green-ish */
+            color: white;
+            border: 4px solid white;
+            font-size: 1.2em;
+            font-weight: 700;
+            padding: 15px 40px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            pointer-events: none; /* Let clicks pass through to wrapper */
+        }
+        .daily-wrapper:hover .btn-share-overlay {
+            transform: scale(1.1);
+            background-color: #1eb556;
+        }
+
+        /* --- Section Dividers --- */
+        .section-divider {
+            text-align: center;
+            margin: 30px 0 20px;
+            border-bottom: 2px solid #eee;
+            line-height: 0.1em;
+        }
+        .section-divider span {
+            background: #fff;
+            padding: 0 15px;
+            color: #888;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        /* --- Grid & Items --- */
+        .sticker-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Mobile 2 cols */
+            gap: 15px;
+        }
+        @media (min-width: 576px) {
+            .sticker-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        
+        .sticker-item {
+            position: relative;
+            cursor: pointer;
+        }
+        .sticker-item img {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            aspect-ratio: 1/1;
+            object-fit: cover;
+        }
+        .badge-custom {
+            position: absolute;
+            top: 5px; right: 5px;
+            font-size: 0.6em;
+            padding: 4px 10px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 700;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .badge-popular { background-color: var(--badge-popular-bg); }
-        .badge-new { background-color: var(--badge-new-bg); }
+        .badge-hot { background-color: #dc3545; } /* Red */
+        .badge-new { background-color: #0dcaf0; } /* Cyan/Blue */
 
-        /* --- Load More Button --- */
-        #load-more-btn { 
-            display: block; width: 100%; padding: 18px; margin-top: 30px; 
-            font-family: "Noto Sans Thai", sans-serif; font-size: 1.3em; 
-            font-weight: bold; color: white; background-color: var(--primary-color); 
-            border: none; border-radius: 12px; cursor: pointer; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        /* --- Floating Elements --- */
+        .fab-instruction {
+            position: fixed;
+            bottom: 80px; /* Above bottom bar */
+            right: 20px;
+            background-color: var(--primary-red);
+            color: white;
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 3px solid white;
+            z-index: 1030;
+            font-size: 0.5em;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .fab-instruction i { font-size: 24px; margin-bottom: 2px; }
+        .fab-instruction span { line-height: 1; font-weight: bold; }
+
+        .floating-bottom-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 1020;
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer;
+            width: 90%; max-width: 400px;
+            justify-content: center;
+            border: 1px solid var(--primary-red);
+        }
+        .floating-bottom-bar span {
+            font-weight: 700;
+            color: var(--primary-red);
+            font-size: 0.9em;
         }
 
-        /* --- Modal (Sharing) --- */
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background-color: rgba(0, 0, 0, 0.85); 
-            display: flex; justify-content: center; align-items: center; 
-            opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; 
-            z-index: 3000; 
+        /* --- Footer --- */
+        .app-footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 16px;
         }
-        .modal-overlay.visible { opacity: 1; visibility: visible; }
-        .modal-content { 
-            position: relative; background-color: white; padding: 30px; 
-            border-radius: 20px; width: 90%; max-width: 450px; text-align: center; 
+
+        /* --- Offcanvas/Modal Tweaks --- */
+        .offcanvas-bottom { height: 60vh; border-radius: 30px 30px 0 0; }
+        .form-check-label { font-size: 0.9em; }
+        .form-check-input { width: 1.5em; height: 1.5em; margin-right: 10px; }
+        
+        /* --- Loading --- */
+        .loading-placeholder {
+            height: 300px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            color: #999;
+            animation: pulse 1.5s infinite;
         }
-        .close-modal { 
-            position: absolute; top: -15px; right: -15px; 
-            background: #d32f2f; color: white; border-radius: 50%; 
-            border: 3px solid white; width: 45px; height: 45px; 
-            font-size: 2em; line-height: 38px; cursor: pointer; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
-        }
-        #modal-media-container { margin-bottom: 20px; }
-        #modal-media-container img, #modal-media-container video { 
-            width: 100%; max-width: 320px; max-height: 320px; 
-            border-radius: 12px; object-fit: contain; 
-            border: 1px solid #eee;
-        }
-        .modal-content textarea { 
-            width: 100%; box-sizing: border-box; padding: 15px; 
-            border-radius: 12px; border: 2px solid #ccc; 
-            min-height: 120px; margin-bottom: 10px; 
-            font-family: "Noto Sans Thai", sans-serif; font-size: 1.2em; 
-        }
-        .modal-helper-text { font-size: 1em; color: #666; margin-bottom: 20px; text-align: center; }
-        .modal-button { 
-            display: block; width: 100%; padding: 18px; 
-            background-color: #28a745; color: #fff; border: none; 
-            border-radius: 12px; cursor: pointer; font-size: 1.4em; font-weight: 700; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
     </style>
 </head>
 <body>
 
-    <div id="loading">
-        <div class="spinner"></div>
-        <div id="loading-text">กำลังโหลดข้อมูล...</div>
-        <div class="loading-prefix">จำใส่ใจอาการสโตรก:</div>
-        <div id="loading-subtext"></div>
-    </div>
+    <!-- Header -->
+    <header class="app-header">
+        <h1 class="app-title">ส่งสติกเกอร์<br>ความรู้สู้สโตรก</h1>
+    </header>
 
-    <div class="main-container" id="app-content" style="display: none;">
-        
-        <div class="instruction-box">
-            <h3>📢 วิธีแชร์ง่ายๆ</h3>
-            <div class="step-item">
-                <div class="step-num">1</div>
-                <div>คลิกที่รูปภาพที่ต้องการแชร์</div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">2</div>
-                <div>แก้ไขข้อความเป็นของตัวเองได้</div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">3</div>
-                <div>กดปุ่ม "ส่งให้เพื่อน"</div>
-            </div>
-        </div>
-
-        <h2 class="section-title">สติกเกอร์ประจำวันนี้</h2>
-        <div id="daily-sticker-container"></div>
-        
-        <h2 class="section-title" style="margin-top: 40px;">คลังสติกเกอร์</h2>
-        <div class="filter-container"><div id="category-filter-container"></div></div>
-        
-        <div class="sticker-library-grid" id="sticker-library-container"></div>
-        <button id="load-more-btn" style="display: none;">แสดงเพิ่ม</button>
-    </div>
-
-    <div class="modal-overlay" id="share-modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal()">&times;</button>
-            <div id="modal-media-container"></div>
-            <textarea id="modal-text-input"></textarea>
-            <p class="modal-helper-text">พิมพ์ข้อความทักทายเพิ่มเติมได้ที่นี่</p>
-            <button id="modal-share-button" class="modal-button">ส่งให้เพื่อน</button>
-        </div>
-    </div>
-
-<script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-<script>
-    // --- CONFIGURATION ---
-    const LIFF_ID = "2005789397-37lemBgX"; 
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec";
-
-    // --- GLOBAL VARIABLES ---
-    let allStickers = [], popularStickerIDs = [], newStickerIDs = [], currentUserProfile = {}, currentFilteredStickers = [];
-    const ITEMS_PER_PAGE = 15;
-    let loadingInterval;
-
-    // --- LOADING ANIMATION LOGIC ---
-    function startLoadingAnimation() {
-        const msgs = ["เซมึนหัว", "ตามัวมาก", "มุมปากตก", "ยกแขนยาก", "ลำบากพูด"];
-        let i = 0;
-        const sub = document.getElementById('loading-subtext');
-        
-        if(sub) sub.textContent = msgs[0];
-
-        loadingInterval = setInterval(() => {
-            if(sub) sub.style.opacity = 0;
-            setTimeout(() => {
-                i = (i + 1) % msgs.length;
-                if(sub) sub.textContent = msgs[i];
-                if(sub) sub.style.opacity = 1;
-            }, 500);
-        }, 2500);
-    }
-
-    function stopLoadingAnimation() {
-        clearInterval(loadingInterval);
-        document.getElementById('loading').style.display = 'none';
-    }
-
-    // --- INITIALIZATION ---
-    async function main() {
-        try {
-            startLoadingAnimation();
-            await liff.init({ liffId: LIFF_ID });
-            if (!liff.isLoggedIn()) { liff.login(); return; }
-            currentUserProfile = await liff.getProfile();
-            await fetchStickers();
-        } catch (error) { 
-            console.error("Init Error", error);
-            alert("เกิดข้อผิดพลาดในการโหลด โปรดปิดแล้วเปิดใหม่");
-            stopLoadingAnimation();
-        }
-    }
-
-    async function fetchStickers() {
-        try {
-            const response = await fetch(GAS_WEB_APP_URL);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const result = await response.json();
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="main-card">
             
-            if (result.status === 'success') {
-                allStickers = result.data;
-                popularStickerIDs = [...allStickers].sort((a, b) => (b.stat || 0) - (a.stat || 0)).slice(0, 3).map(s => s.stickerID);
-                newStickerIDs = [...allStickers].slice(-5).map(s => s.stickerID);
+            <!-- 1. Daily Sticker (Hero) -->
+            <div id="daily-section">
+                <div class="loading-placeholder">กำลังโหลด...</div>
+            </div>
+
+            <!-- Divider -->
+            <h5 class="section-divider">
+                <span>เลือกสติกเกอร์เพิ่มเติมด้านล่าง</span>
+            </h5>
+
+            <!-- 2. Sticker Grid -->
+            <div class="sticker-grid" id="sticker-grid">
+                <!-- Items will be injected here -->
+            </div>
+
+            <!-- Load More -->
+            <button id="btn-load-more" class="btn btn-outline-secondary w-100 rounded-pill mt-4 py-3 fw-bold" style="display:none; font-size: 0.9em;">
+                แสดงเพิ่มเติม
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        จัดทำโดย "สวีรู้ทันสโตรก"<br>รพ.สวี จ.ชุมพร
+    </footer>
+
+    <!-- FAB: Instruction -->
+    <div class="fab-instruction" onclick="showInstruction()">
+        <i class="bi bi-question-lg"></i>
+        <span>วิธีแชร์</span>
+    </div>
+
+    <!-- Floating Bottom Bar: Search/Filter -->
+    <div class="floating-bottom-bar" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+        <i class="bi bi-search text-danger"></i>
+        <span>ค้นหาสติกเกอร์เพิ่มเติม</span>
+    </div>
+
+    <!-- Offcanvas: Filter -->
+    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="filterOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title fw-bold text-danger">🔍 เลือกหมวดหมู่ที่ต้องการ</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div id="category-list" class="d-flex flex-column gap-3">
+                <!-- Checkboxes will be injected -->
+            </div>
+            <button class="btn btn-danger w-100 rounded-pill py-3 mt-4 fw-bold" data-bs-dismiss="offcanvas" onclick="applyFilters()">
+                ตกลง / ค้นหา
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Share Input -->
+    <div class="modal fade" id="shareModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 25px;">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center pt-0">
+                    <div id="share-preview-media" class="mb-3 rounded-3 overflow-hidden shadow-sm"></div>
+                    <h5 class="fw-bold mb-3 text-primary">พิมพ์ข้อความถึงเพื่อน</h5>
+                    <textarea id="share-text" class="form-control bg-light border-0 p-3 mb-2" rows="3" style="font-size: 1rem; border-radius: 15px;"></textarea>
+                    <button onclick="executeShare()" class="btn btn-success w-100 rounded-pill py-3 fw-bold shadow-sm" style="font-size: 1.2rem;">
+                        <i class="bi bi-line me-2"></i> ส่งให้เพื่อน
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Instruction -->
+    <div class="modal fade" id="instructionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 25px; background: #e3f2fd; border: 2px solid #2196f3;">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold text-primary w-100 text-center">📢 วิธีแชร์ง่ายๆ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 pb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-primary rounded-circle p-2 fs-5 me-3" style="width:40px;height:40px;">1</span>
+                        <span class="fw-bold">แตะที่รูปภาพที่ชอบ</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-primary rounded-circle p-2 fs-5 me-3" style="width:40px;height:40px;">2</span>
+                        <span class="fw-bold">พิมพ์ข้อความทักทาย</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary rounded-circle p-2 fs-5 me-3" style="width:40px;height:40px;">3</span>
+                        <span class="fw-bold">กดปุ่ม "ส่งให้เพื่อน"</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <script>
+        // --- CONFIG ---
+        const LIFF_ID = "2005789397-37lemBgX"; // ใส่ LIFF ID ของคุณ
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec";
+
+        // --- STATE ---
+        let allStickers = [];
+        let displayedStickers = [];
+        let currentProfile = null;
+        let selectedSticker = null;
+        let popularIDs = [], newIDs = [];
+        const PAGE_SIZE = 15;
+        let displayCount = 0;
+
+        // --- INIT ---
+        async function init() {
+            try {
+                await liff.init({ liffId: LIFF_ID });
+                if (!liff.isLoggedIn()) { liff.login(); return; }
+                currentProfile = await liff.getProfile();
                 
-                populateCategoryFilter();
-                renderUI();
+                // Fetch Data
+                const res = await fetch(GAS_URL);
+                const json = await res.json();
                 
-                stopLoadingAnimation();
-                document.getElementById('app-content').style.display = 'block';
-            } else { throw new Error(result.message); }
-        } catch (error) { 
-            console.error("Fetch Error", error);
-            stopLoadingAnimation();
-        }
-    }
-
-    // --- UI RENDERING ---
-    function populateCategoryFilter() {
-        const filterContainer = document.getElementById('category-filter-container');
-        const categories = new Set();
-        allStickers.forEach(s => s.category.split(',').forEach(cat => categories.add(cat.trim())));
-        const sortedCategories = Array.from(categories).sort((a,b) => a.localeCompare(b));
-        const todayThai = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
-        const defaultCategories = ['คำแนะนำ', todayThai, 'สิ่งศักดิ์สิทธิ์'];
-        filterContainer.innerHTML = '';
-        sortedCategories.forEach(cat => {
-            const isChecked = defaultCategories.includes(cat);
-            const wrapper = document.createElement('div');
-            wrapper.className = 'checkbox-wrapper';
-            wrapper.innerHTML = `<input type="checkbox" class="cat-checkbox" id="cat-${cat}" value="${cat}" ${isChecked ? 'checked' : ''}><label for="cat-${cat}">${cat}</label>`;
-            filterContainer.appendChild(wrapper);
-        });
-        filterContainer.addEventListener('change', renderUI);
-    }
-
-    function renderUI() {
-        renderDailySticker();
-        renderStickerLibrary();
-    }
-    
-    function renderDailySticker() {
-        const dailyContainer = document.getElementById('daily-sticker-container');
-        dailyContainer.innerHTML = '';
-        const todayThai = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
-        const dailyStickers = allStickers.filter(s => s.category.includes(todayThai));
-        if (dailyStickers.length > 0) {
-            const randomSticker = dailyStickers[Math.floor(Math.random() * dailyStickers.length)];
-            dailyContainer.appendChild(createStickerElement(randomSticker, { isDaily: true }));
-        } else { dailyContainer.innerHTML = '<p style="text-align:center; font-size:1.2em;">ไม่มีสติกเกอร์สำหรับวันนี้</p>'; }
-    }
-
-    function renderStickerLibrary() {
-        const selectedCategories = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
-        const filtered = selectedCategories.length > 0 ? allStickers.filter(s => s.category.split(',').map(c => c.trim()).some(sc => selectedCategories.includes(sc))) : [];
-        const popularInFilter = filtered.filter(s => popularStickerIDs.includes(s.stickerID));
-        const popularIdsInFilter = popularInFilter.map(s => s.stickerID);
-        const regularStickers = filtered.filter(s => !popularIdsInFilter.includes(s.stickerID));
-        currentFilteredStickers = [...popularInFilter, ...shuffleArray(regularStickers)];
-        const libraryContainer = document.getElementById('sticker-library-container');
-        libraryContainer.innerHTML = '';
-        currentFilteredStickers.slice(0, ITEMS_PER_PAGE).forEach(sticker => { libraryContainer.appendChild(createStickerElement(sticker)); });
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        loadMoreBtn.style.display = currentFilteredStickers.length > ITEMS_PER_PAGE ? 'block' : 'none';
-        loadMoreBtn.onclick = loadMoreStickers;
-    }
-
-    function createStickerElement(sticker, options = {}) {
-        const { isDaily = false } = options;
-        const container = document.createElement('div');
-        container.className = isDaily ? 'daily-sticker-card' : 'sticker-item';
-        
-        if (isDaily) {
-            const label = document.createElement('div');
-            label.className = 'daily-label';
-            label.textContent = "✨ แนะนำสำหรับวันนี้";
-            container.appendChild(label);
-        }
-
-        const img = document.createElement('img');
-        img.src = sticker.previewURL || sticker.imageURL;
-        img.alt = sticker.text ? sticker.text.substring(0, 30) : 'Sticker';
-        img.loading = 'lazy';
-        container.appendChild(img);
-        if (!isDaily) {
-            let badgeText = '', badgeClass = '';
-            if (popularStickerIDs.includes(sticker.stickerID)) { badgeText = 'ยอดนิยม 🔥'; badgeClass = 'badge-popular'; } 
-            else if (newStickerIDs.includes(sticker.stickerID)) { badgeText = 'มาใหม่ 🆕'; badgeClass = 'badge-new'; }
-            if (badgeText) {
-                const badge = document.createElement('div');
-                badge.className = `sticker-badge ${badgeClass}`;
-                badge.textContent = badgeText;
-                container.appendChild(badge);
+                if (json.status === 'success') {
+                    allStickers = json.data;
+                    processDataStats();
+                    renderDaily();
+                    renderFilterOptions();
+                    applyFilters(); // First render of grid
+                }
+            } catch (e) {
+                console.error(e);
+                alert("เกิดข้อผิดพลาดในการโหลดข้อมูล");
             }
         }
-        container.onclick = () => openModal(sticker);
-        return container;
-    }
 
-    function loadMoreStickers() {
-        const libraryContainer = document.getElementById('sticker-library-container');
-        currentFilteredStickers.slice(ITEMS_PER_PAGE).forEach(sticker => { libraryContainer.appendChild(createStickerElement(sticker)); });
-        document.getElementById('load-more-btn').style.display = 'none';
-    }
-
-    // --- MODAL & SHARING ---
-    function openModal(sticker) {
-        const modal = document.getElementById('share-modal');
-        const mediaContainer = document.getElementById('modal-media-container');
-        mediaContainer.innerHTML = ''; 
-        if (sticker.category.includes('วิดีโอ') && sticker.imageURL) {
-            const video = document.createElement('video');
-            video.src = sticker.imageURL;
-            video.controls = true; video.autoplay = true; video.muted = true; video.loop = true; video.playsInline = true;
-            mediaContainer.appendChild(video);
-        } else {
-            const img = document.createElement('img');
-            img.src = sticker.imageURL;
-            mediaContainer.appendChild(img);
+        function processDataStats() {
+            // Top 3 Popular
+            popularIDs = [...allStickers].sort((a,b) => (b.stat||0) - (a.stat||0)).slice(0,3).map(s => s.stickerID);
+            // Newest 5
+            newIDs = [...allStickers].slice(-5).map(s => s.stickerID);
         }
-        document.getElementById('modal-text-input').value = sticker.text || "สวัสดีครับ/ค่ะ";
-        document.getElementById('modal-share-button').onclick = () => shareMessage(sticker);
-        modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-        modal.classList.add('visible');
-    }
 
-    function closeModal() {
-        const modal = document.getElementById('share-modal');
-        modal.classList.remove('visible');
-        const mediaContainer = document.getElementById('modal-media-container');
-        mediaContainer.innerHTML = '';
-    }
-    
-    // --- FLEX MESSAGE LOGIC ---
-    function createFlexFooter(bgColor = '#FFFFFF') {
-        return {
-            type: "box", layout: "vertical", spacing: "sm", paddingAll: "md", backgroundColor: bgColor, alignItems: "center",
-            action: { type: "uri", label: "เปิด LINE Official", uri: "https://lin.ee/MjUwBob" },
-            contents: [
-                {
-                    type: "box", layout: "vertical", maxWidth: "70%", backgroundColor: "#FFFFFF", cornerRadius: "md", paddingAll: "sm",
-                    action: { type: "uri", label: "ส่งให้เพื่อน", uri: `https://liff.line.me/${LIFF_ID}` },
-                    contents: [{ type: "text", text: "ส่งให้เพื่อน", color: "#111111", size: "sm", align: "center" }]
-                },
-                { type: "text", text: "จัดทำโดย Line สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร", size: "xxs", color: "#AAAAAA", margin: "md", wrap: true }
-            ]
-        };
-    }
+        // --- RENDER FUNCTIONS ---
+        function renderDaily() {
+            const today = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
+            const todayStickers = allStickers.filter(s => s.category.includes(today));
+            const sticker = todayStickers.length > 0 
+                ? todayStickers[Math.floor(Math.random() * todayStickers.length)] 
+                : allStickers[Math.floor(Math.random() * allStickers.length)]; // Fallback
 
-    function createImageFlex(sticker) {
-        const safeFlexBG = (sticker.flexBG && sticker.flexBG.startsWith('#')) ? sticker.flexBG : '#FFFFFF';
-        const heroBlock = { type: "box", layout: "vertical", paddingAll: "0px", backgroundColor: safeFlexBG, contents: [{ type: "image", url: sticker.imageURL, size: "full", aspectMode: "fit" }] };
-        if (sticker.linkURL) { heroBlock.contents[0].action = { type: "uri", label: "ดูเพิ่มเติม", uri: sticker.linkURL }; }
-        return { type: "flex", altText: `เพื่อนส่งสติกเกอร์ให้คุณ`, contents: { type: "bubble", size: "mega", hero: heroBlock, footer: createFlexFooter(safeFlexBG) }};
-    }
+            const container = document.getElementById('daily-section');
+            container.innerHTML = `
+                <div class="daily-wrapper" onclick="prepareShare('${sticker.stickerID}')">
+                    <img src="${sticker.imageURL}" class="daily-img" alt="Daily Sticker">
+                    <div class="daily-overlay">
+                        <button class="btn-share-overlay">
+                            <i class="bi bi-send-fill"></i> กดเพื่อส่ง
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center fw-bold text-danger fs-5">✨ สติกเกอร์แนะนำวันนี้</div>
+            `;
+        }
 
-    function createVideoFlex(sticker) {
-        if (!sticker.imageURL || !sticker.previewURL) return null;
-        const videoComponent = { type: "video", url: sticker.imageURL, previewUrl: sticker.previewURL, aspectRatio: "16:9", action: { type: "uri", label: "ดูวิดีโอ", uri: sticker.imageURL }, altContent: { type: 'box', layout: 'vertical', justifyContent: 'center', alignItems: 'center', contents: [{ type: 'text', text: 'ไม่สามารถเล่นวิดีโอได้', color: '#ffffff' }] } };
-        return { type: "flex", altText: "เพื่อนส่งวิดีโอให้คุณ", contents: { type: "bubble", size: "mega", body: { type: "box", layout: "vertical", paddingAll: "0px", contents: [videoComponent] }, footer: createFlexFooter() }};
-    }
+        function renderFilterOptions() {
+            const cats = new Set();
+            allStickers.forEach(s => s.category.split(',').forEach(c => cats.add(c.trim())));
+            const sortedCats = Array.from(cats).sort();
+            
+            const list = document.getElementById('category-list');
+            const today = new Date().toLocaleDateString('th-TH', { weekday: 'long' });
+            
+            let html = '';
+            sortedCats.forEach(c => {
+                const isChecked = [today, 'คำแนะนำ', 'สิ่งศักดิ์สิทธิ์'].includes(c) ? 'checked' : '';
+                html += `
+                    <div class="form-check">
+                        <input class="form-check-input filter-cb" type="checkbox" value="${c}" id="cat-${c}" ${isChecked}>
+                        <label class="form-check-label fw-bold" for="cat-${c}">${c}</label>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
 
-    async function shareMessage(sticker) {
-        const userMessage = document.getElementById('modal-text-input').value.trim();
-        let messagesToSend = [];
-        let flexMessage;
-        if (sticker.category.includes('วิดีโอ')) { flexMessage = createVideoFlex(sticker); } 
-        else { flexMessage = createImageFlex(sticker); }
-        if (!flexMessage) { alert("ไม่สามารถสร้างข้อความสำหรับแชร์ได้ ข้อมูลอาจไม่สมบูรณ์"); return; }
-        messagesToSend.push(flexMessage);
-        if (userMessage) { messagesToSend.push({ type: "text", text: userMessage }); }
-        try {
-            const result = await liff.shareTargetPicker(messagesToSend);
-            if (result) {
-                closeModal();
-                await logAndIncrementStat(sticker.stickerID, currentUserProfile.userId);
-                liff.closeWindow();
+        function applyFilters() {
+            const checkedBoxes = document.querySelectorAll('.filter-cb:checked');
+            const selectedCats = Array.from(checkedBoxes).map(cb => cb.value);
+
+            if (selectedCats.length === 0) {
+                displayedStickers = allStickers;
+            } else {
+                displayedStickers = allStickers.filter(s => 
+                    s.category.split(',').some(c => selectedCats.includes(c.trim()))
+                );
             }
-        } catch (error) { console.error("Share Error", error); }
-    }
+            
+            // Shuffle non-popular
+            const pops = displayedStickers.filter(s => popularIDs.includes(s.stickerID));
+            const others = displayedStickers.filter(s => !popularIDs.includes(s.stickerID));
+            
+            // Randomize others array simply
+            for (let i = others.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [others[i], others[j]] = [others[j], others[i]];
+            }
 
-    async function logAndIncrementStat(stickerID, userID) {
-        try {
-            await fetch(GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stickerID, userID }), mode: 'no-cors' });
-        } catch (error) { console.error("Log/Increment request failed:", error); }
-    }
-    
-    // --- UTILITIES ---
-    function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
+            displayedStickers = [...pops, ...others];
+            displayCount = 0;
+            document.getElementById('sticker-grid').innerHTML = '';
+            loadMore();
+        }
 
-    // --- START APP ---
-    main();
-</script>
+        function loadMore() {
+            const grid = document.getElementById('sticker-grid');
+            const nextBatch = displayedStickers.slice(displayCount, displayCount + PAGE_SIZE);
+            
+            nextBatch.forEach(s => {
+                const isHot = popularIDs.includes(s.stickerID);
+                const isNew = newIDs.includes(s.stickerID);
+                let badgeHTML = '';
+                
+                // No Icon, Just Text as requested
+                if(isHot) badgeHTML = `<div class="badge-custom badge-hot">มาแรง</div>`;
+                else if(isNew) badgeHTML = `<div class="badge-custom badge-new">มาใหม่</div>`;
+
+                const col = document.createElement('div');
+                col.innerHTML = `
+                    <div class="sticker-item" onclick="prepareShare('${s.stickerID}')">
+                        <img src="${s.previewURL || s.imageURL}" loading="lazy">
+                        ${badgeHTML}
+                    </div>
+                `;
+                grid.appendChild(col);
+            });
+
+            displayCount += nextBatch.length;
+            const btn = document.getElementById('btn-load-more');
+            btn.style.display = displayCount < displayedStickers.length ? 'block' : 'none';
+            if(nextBatch.length > 0) btn.onclick = loadMore;
+        }
+
+        // --- SHARE LOGIC ---
+        function prepareShare(sid) {
+            selectedSticker = allStickers.find(s => s.stickerID === sid);
+            if(!selectedSticker) return;
+
+            // Setup Modal
+            const mediaDiv = document.getElementById('share-preview-media');
+            if(selectedSticker.category.includes('วิดีโอ')) {
+                mediaDiv.innerHTML = `<video src="${selectedSticker.imageURL}" autoplay loop muted class="w-100"></video>`;
+            } else {
+                mediaDiv.innerHTML = `<img src="${selectedSticker.imageURL}" class="w-100">`;
+            }
+            document.getElementById('share-text').value = selectedSticker.text || "สวัสดีครับ";
+            
+            const modal = new bootstrap.Modal(document.getElementById('shareModal'));
+            modal.show();
+        }
+
+        async function executeShare() {
+            if(!selectedSticker || !currentProfile) return;
+
+            const text = document.getElementById('share-text').value;
+            // Generate Referrer Link for the button inside Flex Message
+            // IMPORTANT: This allows you to track "Referral" when receiver clicks
+            const refParam = `?ref=${currentProfile.userId}&sticker=${selectedSticker.stickerID}`;
+            const targetUrl = `https://liff.line.me/${LIFF_ID}${refParam}`; 
+
+            const flexMsg = createFlex(selectedSticker, text, targetUrl);
+
+            try {
+                const res = await liff.shareTargetPicker([flexMsg]);
+                if(res) {
+                    // Log to GAS (vhv_share)
+                    fetch(GAS_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify({
+                            userID: currentProfile.userId,
+                            stickerID: selectedSticker.stickerID,
+                            type: 'share'
+                        })
+                    });
+                    
+                    const modalEl = document.getElementById('shareModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    liff.closeWindow();
+                }
+            } catch (e) {
+                console.error("Share failed", e);
+                alert("แชร์ไม่สำเร็จ หรือผู้ใช้ยกเลิก");
+            }
+        }
+
+        function createFlex(sticker, customText, linkUrl) {
+            // Simplified Flex for Elderly (Big Image)
+            const isVideo = sticker.category.includes('วิดีโอ');
+            
+            // Hero Image/Video
+            let hero = {};
+            if(isVideo) {
+                 hero = {
+                    type: "image", url: sticker.previewURL || sticker.imageURL, 
+                    size: "full", aspectMode: "cover", aspectRatio: "1:1",
+                    action: { type: "uri", uri: sticker.imageURL } // Open Video
+                };
+            } else {
+                hero = {
+                    type: "image", url: sticker.imageURL, 
+                    size: "full", aspectMode: "cover", aspectRatio: "1:1",
+                    action: { type: "uri", uri: linkUrl } // Link with Ref
+                };
+            }
+
+            return {
+                type: "flex",
+                altText: "ได้รับสติกเกอร์ความรู้สู้สโตรก",
+                contents: {
+                    type: "bubble",
+                    body: {
+                        type: "box", layout: "vertical", paddingAll: "0px",
+                        contents: [hero]
+                    },
+                    footer: {
+                        type: "box", layout: "vertical", spacing: "sm", backgroundColor: sticker.flexBG || "#ffffff",
+                        contents: [
+                            { type: "text", text: customText, wrap: true, align: "center", size: "md", color: "#333333", weight: "bold" },
+                            {
+                                type: "button", style: "primary", color: "#ff3654", height: "sm",
+                                action: { type: "uri", label: "ส่งต่อให้เพื่อน", uri: `https://liff.line.me/${LIFF_ID}` }
+                            }
+                        ]
+                    }
+                }
+            };
+        }
+
+        function showInstruction() {
+            new bootstrap.Modal(document.getElementById('instructionModal')).show();
+        }
+
+        // Run
+        init();
+    </script>
 </body>
 </html>
