@@ -256,15 +256,17 @@
             display: flex;
             align-items: center;
         }
-        .form-check-input { 
+        /* FIX: ใช้ selector ที่เฉพาะเจาะจงขึ้น (.form-check .form-check-input) เพื่อทับค่า default ของ bootstrap */
+        .form-check .form-check-input { 
             width: 1.5em; height: 1.5em; /* Checkbox size */
-            margin-left: 0;
+            margin-left: 0; /* Reset negative margin */
             margin-right: 8px;
             margin-top: 0;
             flex-shrink: 0;
+            float: none;
             border: 2px solid #ccc;
         }
-        .form-check-input:checked {
+        .form-check .form-check-input:checked {
             background-color: var(--primary-red);
             border-color: var(--primary-red);
         }
