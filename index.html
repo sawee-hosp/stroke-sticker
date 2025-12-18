@@ -90,23 +90,26 @@
             display: block;
         }
 
-        /* Share Button (Glowing) */
+        /* Share Button (Glowing) - Centered */
         .btn-share-glow {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
+            bottom: 20px;
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%); /* Adjust to perfect center */
             background-color: var(--line-green);
             color: white;
             border: 2px solid white;
             border-radius: 50px;
-            padding: 8px 15px;
-            font-size: 0.8em; /* ขนาดพอเหมาะ ไม่บังรายละเอียด */
+            padding: 8px 20px;
+            font-size: 0.9em;
             font-weight: 700;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             z-index: 10;
+            white-space: nowrap;
             animation: glow-pulse 2s infinite;
             pointer-events: none; /* ให้คลิกทะลุไปที่ wrapper ได้ */
         }
@@ -226,41 +229,50 @@
 
         /* --- Offcanvas (Filter) Tweaks --- */
         .offcanvas-bottom { 
-            height: auto;
-            max-height: 50vh; /* Adjust height */
+            height: 50vh !important; /* Full half screen */
+            max-height: none;
             border-radius: 30px 30px 0 0; 
         }
         .offcanvas-header {
-            padding: 15px 20px 10px; /* Reduce padding */
+            padding: 15px 20px 10px; 
         }
         .offcanvas-title {
-            font-size: 1rem; /* Adjust title size */
+            font-size: 1.2rem;
         }
         .offcanvas-body {
-            padding: 10px 20px 20px; /* Reduce padding */
+            padding: 10px 20px 20px; 
         }
         #category-list {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px; /* Reduced gap */
+            grid-template-columns: repeat(3, 1fr); /* 3 Columns */
+            gap: 10px; 
         }
         .form-check {
-            background: #f8f9fa;
-            padding: 8px 8px 8px 30px; /* Compact padding */
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            margin-bottom: 0;
-            min-height: auto;
+            /* Minimal style (No box) */
+            background: transparent;
+            border: none;
+            padding-left: 0; /* Reset bootstrap padding */
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
         }
         .form-check-input { 
-            width: 1.2em; height: 1.2em; /* Reduced checkbox size */
-            margin-left: -1.6em; 
-            margin-top: 0.15em;
+            width: 1.5em; height: 1.5em; /* Checkbox size */
+            margin-left: 0;
+            margin-right: 8px;
+            margin-top: 0;
+            flex-shrink: 0;
+            border: 2px solid #ccc;
+        }
+        .form-check-input:checked {
+            background-color: var(--primary-red);
+            border-color: var(--primary-red);
         }
         .form-check-label { 
-            font-size: 0.9rem; /* Reduced font size to match/be smaller */
+            font-size: 1.1rem; /* Larger text */
             font-weight: 600;
-            line-height: 1.5;
+            line-height: 1.2;
+            color: #444;
         }
         
         /* --- Loading --- */
@@ -334,9 +346,9 @@
         </div>
         <div class="offcanvas-body d-flex flex-column">
             <div id="category-list">
-                <!-- Checkboxes will be injected as grid 2 cols -->
+                <!-- Checkboxes will be injected as grid 3 cols -->
             </div>
-            <button class="btn btn-danger w-100 rounded-pill py-3 mt-4 fw-bold shadow-sm" data-bs-dismiss="offcanvas" onclick="applyFilters()">
+            <button class="btn btn-danger w-100 rounded-pill py-3 mt-auto fw-bold shadow-sm" data-bs-dismiss="offcanvas" onclick="applyFilters()">
                 ตกลง / ค้นหา
             </button>
         </div>
